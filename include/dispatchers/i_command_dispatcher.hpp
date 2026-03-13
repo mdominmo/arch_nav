@@ -16,7 +16,7 @@ class ICommandDispatcher {
 
   virtual void execute_arm() = 0;
   virtual void execute_disarm() = 0;
-  virtual void execute_land(double z_start) = 0;
+  virtual void execute_land(double descent_velocity) = 0;
 
   virtual void stop() = 0;
 

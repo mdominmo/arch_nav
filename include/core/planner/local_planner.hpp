@@ -22,6 +22,8 @@ class ILocalPlanner {
       const vehicle::Kinematics& from,
       double target_z) const = 0;
 
+  virtual double land_descent_velocity() const = 0;
+
   virtual ~ILocalPlanner() = default;
 };
 

@@ -17,7 +17,7 @@ constexpr double kMaxAngularVelocity    = 1.0;
 
 KinematicPointToPointLocalPlanner make_planner()
 {
-  return KinematicPointToPointLocalPlanner(kMaxLinearVelocity, 1.0, kMaxAngularVelocity, 0.5, 0.5, 0.2, 0.1);
+  return KinematicPointToPointLocalPlanner(kMaxLinearVelocity, 1.0, kMaxAngularVelocity, 0.5, 0.5, 0.2, 0.1, 0.4);
 }
 
 Kinematics make_state(

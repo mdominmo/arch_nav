@@ -2,7 +2,7 @@
 
 namespace arch_nav::controller {
 
-LandTask::LandTask(double z_start) : z_start_(z_start) {}
+LandTask::LandTask(double descent_velocity) : descent_velocity_(descent_velocity) {}
 
 void LandTask::start(
     context::VehicleContext&,
@@ -10,7 +10,7 @@ void LandTask::start(
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()>) {
   dispatcher_ = &dispatcher;
-  dispatcher.execute_land(z_start_);
+  dispatcher.execute_land(descent_velocity_);
 }
 
 void LandTask::abort() {

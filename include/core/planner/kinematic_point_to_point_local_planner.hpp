@@ -18,7 +18,8 @@ class KinematicPointToPointLocalPlanner : public ILocalPlanner {
       double max_angular_acceleration,
       double max_vertical_velocity,
       double max_vertical_acceleration,
-      double time_step);
+      double time_step,
+      double land_descent_velocity);
 
   std::vector<vehicle::TrajectoryPoint> plan_travel(
       const vehicle::Kinematics& from,
@@ -32,6 +33,8 @@ class KinematicPointToPointLocalPlanner : public ILocalPlanner {
       const vehicle::Kinematics& from,
       double target_z) const override;
 
+  double land_descent_velocity() const override;
+
  private:
   double max_linear_velocity_;
   double max_linear_acceleration_;
@@ -40,6 +43,7 @@ class KinematicPointToPointLocalPlanner : public ILocalPlanner {
   double max_vertical_velocity_;
   double max_vertical_acceleration_;
   double time_step_;
+  double land_descent_velocity_;
 };
 
 }  // namespace arch_nav::planner

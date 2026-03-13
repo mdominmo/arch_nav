@@ -42,8 +42,7 @@ void OperationalController::takeoff(double height) {
 }
 
 void OperationalController::land() {
-  const auto current = state_manager_.get_kinematic();
-  current_state_->try_execute(*this, std::make_unique<LandTask>(current.z));
+  current_state_->try_execute(*this, std::make_unique<LandTask>(planner_.land_descent_velocity()));
 }
 
 void OperationalController::waypoint_following(

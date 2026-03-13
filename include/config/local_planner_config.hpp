@@ -11,6 +11,7 @@ struct LocalPlannerConfig {
   double max_vertical_velocity;
   double max_vertical_acceleration;
   double time_step;
+  double land_descent_velocity{0.4};  // m/s, constant descent velocity during landing
 };
 
 }  // namespace arch_nav::config

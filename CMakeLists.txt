@@ -6,10 +6,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
 find_package(geographic_msgs REQUIRED)
-find_package(px4_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
@@ -23,18 +20,12 @@ add_library(${PROJECT_NAME} SHARED
   src/core/controller/tasks/waypoint_task.cpp
   src/core/context/vehicle_context.cpp
   src/core/planner/kinematic_point_to_point_local_planner.cpp
-  src/adapters/px4/vehicle_local_position_adapter.cpp
-  src/adapters/px4/trajectory_setpoint_adapter.cpp
-  src/adapters/px4/vehicle_global_position_adapter.cpp
-  src/adapters/px4/vehicle_status_adapter.cpp
-  src/dispatchers/px4/px4_command_dispatcher.cpp
-  src/listeners/px4/vehicle_local_position_listener.cpp
-  src/listeners/px4/vehicle_global_position_listener.cpp
-  src/listeners/px4/vehicle_status_listener.cpp
   src/utils/gnss_local_frame.cpp
   src/config/navigation_config_loader.cpp
   src/navigation_api.cpp
-  src/navigation_system_provider.cpp
+  src/navigation_system_core.cpp
+  src/platform/driver_registry.cpp
+  src/arch_nav.cpp
 )
 target_link_libraries(${PROJECT_NAME} yaml-cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -42,16 +33,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(${PROJECT_NAME}
-  ament_index_cpp
   geographic_msgs
-  px4_msgs
-  rclcpp
 )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  file(MAKE_DIRECTORY /tmp/arch_nav_ros_home)
-  file(MAKE_DIRECTORY /tmp/arch_nav_ros_logs)
 
   ament_add_gtest(test_global_position
     test/unit/core/state/test_global_position.cpp
@@ -108,50 +94,6 @@ if(BUILD_TESTING)
     LABELS "unit"
   )
 
-  ament_add_gtest(test_vehicle_local_position_adapter
-    test/unit/adapters/px4/test_vehicle_local_position_adapter.cpp
-  )
-  target_include_directories(test_vehicle_local_position_adapter PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_local_position_adapter ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_local_position_adapter PROPERTIES
-    LABELS "unit"
-  )
-
-  ament_add_gtest(test_vehicle_global_position_adapter
-    test/unit/adapters/px4/test_vehicle_global_position_adapter.cpp
-  )
-  target_include_directories(test_vehicle_global_position_adapter PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_global_position_adapter ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_global_position_adapter PROPERTIES
-    LABELS "unit"
-  )
-
-  ament_add_gtest(test_vehicle_status_adapter
-    test/unit/adapters/px4/test_vehicle_status_adapter.cpp
-  )
-  target_include_directories(test_vehicle_status_adapter PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_status_adapter ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_status_adapter PROPERTIES
-    LABELS "unit"
-  )
-
-  ament_add_gtest(test_trajectory_setpoint_adapter
-    test/unit/adapters/px4/test_trajectory_setpoint_adapter.cpp
-  )
-  target_include_directories(test_trajectory_setpoint_adapter PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_trajectory_setpoint_adapter ${PROJECT_NAME})
-  set_tests_properties(test_trajectory_setpoint_adapter PROPERTIES
-    LABELS "unit"
-  )
-
   ament_add_gtest(test_gnss_local_frame
     test/unit/utils/test_gnss_local_frame.cpp
   )
@@ -161,66 +103,6 @@ if(BUILD_TESTING)
   target_link_libraries(test_gnss_local_frame ${PROJECT_NAME})
   set_tests_properties(test_gnss_local_frame PROPERTIES
     LABELS "unit"
-  )
-
-  ament_add_gtest(test_vehicle_local_position_listener_integration
-    test/integration/listeners/px4/test_vehicle_local_position_listener_integration.cpp
-  )
-  target_include_directories(test_vehicle_local_position_listener_integration PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_local_position_listener_integration ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_local_position_listener_integration PROPERTIES
-    ENVIRONMENT "ROS_HOME=/tmp/arch_nav_ros_home;ROS_LOG_DIR=/tmp/arch_nav_ros_logs"
-    LABELS "integration"
-  )
-
-  ament_add_gtest(test_vehicle_global_position_listener_integration
-    test/integration/listeners/px4/test_vehicle_global_position_listener_integration.cpp
-  )
-  target_include_directories(test_vehicle_global_position_listener_integration PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_global_position_listener_integration ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_global_position_listener_integration PROPERTIES
-    ENVIRONMENT "ROS_HOME=/tmp/arch_nav_ros_home;ROS_LOG_DIR=/tmp/arch_nav_ros_logs"
-    LABELS "integration"
-  )
-
-  ament_add_gtest(test_vehicle_status_listener_integration
-    test/integration/listeners/px4/test_vehicle_status_listener_integration.cpp
-  )
-  target_include_directories(test_vehicle_status_listener_integration PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_status_listener_integration ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_status_listener_integration PROPERTIES
-    ENVIRONMENT "ROS_HOME=/tmp/arch_nav_ros_home;ROS_LOG_DIR=/tmp/arch_nav_ros_logs"
-    LABELS "integration"
-  )
-
-  ament_add_gtest(test_px4_command_dispatcher_integration
-    test/integration/dispatchers/px4/test_px4_command_dispatcher_integration.cpp
-  )
-  target_include_directories(test_px4_command_dispatcher_integration PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_px4_command_dispatcher_integration ${PROJECT_NAME})
-  set_tests_properties(test_px4_command_dispatcher_integration PROPERTIES
-    ENVIRONMENT "ROS_HOME=/tmp/arch_nav_ros_home;ROS_LOG_DIR=/tmp/arch_nav_ros_logs"
-    LABELS "integration"
-  )
-
-  ament_add_gtest(test_operational_controller_integration
-    test/integration/core/controller/test_operational_controller_integration.cpp
-  )
-  target_include_directories(test_operational_controller_integration PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_operational_controller_integration ${PROJECT_NAME})
-  set_tests_properties(test_operational_controller_integration PROPERTIES
-    ENVIRONMENT "ROS_HOME=/tmp/arch_nav_ros_home;ROS_LOG_DIR=/tmp/arch_nav_ros_logs"
-    LABELS "integration"
   )
 endif()
 
@@ -241,10 +123,7 @@ install(TARGETS ${PROJECT_NAME}
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(
-  ament_index_cpp
   geographic_msgs
-  px4_msgs
-  rclcpp
 )
 
 ament_package()

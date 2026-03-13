@@ -101,15 +101,21 @@ KinematicPointToPointLocalPlanner::KinematicPointToPointLocalPlanner(
     double max_angular_acceleration,
     double max_vertical_velocity,
     double max_vertical_acceleration,
-    double time_step)
+    double time_step,
+    double land_descent_velocity)
 : max_linear_velocity_(max_linear_velocity),
   max_linear_acceleration_(max_linear_acceleration),
   max_angular_velocity_(max_angular_velocity),
   max_angular_acceleration_(max_angular_acceleration),
   max_vertical_velocity_(max_vertical_velocity),
   max_vertical_acceleration_(max_vertical_acceleration),
-  time_step_(time_step)
+  time_step_(time_step),
+  land_descent_velocity_(land_descent_velocity)
 {
+}
+
+double KinematicPointToPointLocalPlanner::land_descent_velocity() const {
+  return land_descent_velocity_;
 }
 
 std::vector<vehicle::TrajectoryPoint> KinematicPointToPointLocalPlanner::plan_travel(

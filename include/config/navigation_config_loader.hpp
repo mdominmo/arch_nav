@@ -9,7 +9,6 @@ namespace arch_nav::config {
 
 class NavigationConfigLoader {
  public:
-  static NavigationConfig load_from();
   static NavigationConfig load_from(const std::string& path);
 };
 
