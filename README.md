@@ -66,3 +66,10 @@ local_planner:
   time_step:                0.05  # s
   land_descent_velocity:    0.4   # m/s — constant descent rate during landing
 ```
+
+## Platform drivers
+
+Drivers are external packages that implement `IPlatformDriver` and self-register into `DriverRegistry` at process startup. The kernel has no knowledge of any specific driver — it only interacts through the interfaces it defines.
+
+> [!NOTE]
+> [arch-nav-px4-driver](https://github.com/mdominmo/arch-nav-px4-driver) is the reference driver for PX4-based autopilots. Its source is the canonical example of how to implement and integrate a driver for arch-nav.
