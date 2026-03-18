@@ -1,5 +1,5 @@
-#ifndef NAVIGATION_STATE_REGISTER__NAVIGATION_API_HPP_
-#define NAVIGATION_STATE_REGISTER__NAVIGATION_API_HPP_
+#ifndef ARCH_NAV__ARCH_NAV_API_HPP_
+#define ARCH_NAV__ARCH_NAV_API_HPP_
 
 #include <vector>
 
@@ -10,9 +10,9 @@
 
 namespace arch_nav {
 
-class NavigationApi {
+class ArchNavApi {
  public:
-  explicit NavigationApi(controller::OperationalController& controller);
+  explicit ArchNavApi(controller::OperationalController& controller);
 
   void takeoff(double height);
   void land();
@@ -29,4 +29,4 @@ class NavigationApi {
 
 }  // namespace arch_nav
 
-#endif  // NAVIGATION_STATE_REGISTER__NAVIGATION_API_HPP_
+#endif  // ARCH_NAV__ARCH_NAV_API_HPP_

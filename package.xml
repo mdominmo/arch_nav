@@ -6,6 +6,7 @@
   <maintainer email="mandominguez97@gmail.com">Manuel Domínguez Montero</maintainer>
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>ament_index_cpp</depend>
   <depend>geographic_msgs</depend>
   <depend>yaml-cpp</depend>
   <test_depend>ament_cmake_gtest</test_depend>

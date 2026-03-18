@@ -4,15 +4,16 @@
 #include <memory>
 #include <string>
 
-#include "navigation_api.hpp"
+#include "arch_nav_api.hpp"
 
 namespace arch_nav {
 
 class ArchNav {
  public:
+  static std::unique_ptr<ArchNav> create();
   static std::unique_ptr<ArchNav> create(const std::string& config_path);
 
-  NavigationApi& api();
+  ArchNavApi& api();
 
   ~ArchNav();
 

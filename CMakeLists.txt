@@ -6,6 +6,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(geographic_msgs REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
@@ -21,9 +22,9 @@ add_library(${PROJECT_NAME} SHARED
   src/core/context/vehicle_context.cpp
   src/core/planner/kinematic_point_to_point_local_planner.cpp
   src/utils/gnss_local_frame.cpp
-  src/config/navigation_config_loader.cpp
-  src/navigation_api.cpp
-  src/navigation_system_core.cpp
+  src/config/arch_nav_config_loader.cpp
+  src/arch_nav_api.cpp
+  src/arch_nav_core.cpp
   src/platform/driver_registry.cpp
   src/arch_nav.cpp
 )
@@ -33,6 +34,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(${PROJECT_NAME}
+  ament_index_cpp
   geographic_msgs
 )
 
@@ -123,6 +125,7 @@ install(TARGETS ${PROJECT_NAME}
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(
+  ament_index_cpp
   geographic_msgs
 )
 

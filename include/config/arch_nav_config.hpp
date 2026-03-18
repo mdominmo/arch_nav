@@ -1,5 +1,5 @@
-#ifndef NAVIGATION_STATE_REGISTER__CONFIG__NAVIGATION_CONFIG_HPP_
-#define NAVIGATION_STATE_REGISTER__CONFIG__NAVIGATION_CONFIG_HPP_
+#ifndef ARCH_NAV__CONFIG__ARCH_NAV_CONFIG_HPP_
+#define ARCH_NAV__CONFIG__ARCH_NAV_CONFIG_HPP_
 
 #include <string>
 
@@ -7,7 +7,7 @@
 
 namespace arch_nav::config {
 
-struct NavigationConfig {
+struct ArchNavConfig {
   std::string        driver;
   std::string        driver_config_path;
   LocalPlannerConfig local_planner;
@@ -15,4 +15,4 @@ struct NavigationConfig {
 
 }  // namespace arch_nav::config
 
-#endif  // NAVIGATION_STATE_REGISTER__CONFIG__NAVIGATION_CONFIG_HPP_
+#endif  // ARCH_NAV__CONFIG__ARCH_NAV_CONFIG_HPP_

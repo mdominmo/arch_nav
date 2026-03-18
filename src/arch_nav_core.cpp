@@ -1,8 +1,8 @@
-#include "navigation_system_core.hpp"
+#include "arch_nav_core.hpp"
 
 namespace arch_nav {
 
-NavigationSystemCore::NavigationSystemCore(
+ArchNavCore::ArchNavCore(
     dispatchers::ICommandDispatcher& dispatcher,
     const config::LocalPlannerConfig& config)
     : context_()
@@ -18,11 +18,11 @@ NavigationSystemCore::NavigationSystemCore(
     , controller_(context_, planner_, dispatcher)
     , api_(controller_) {}
 
-NavigationApi& NavigationSystemCore::api() {
+ArchNavApi& ArchNavCore::api() {
   return api_;
 }
 
-context::VehicleContext& NavigationSystemCore::context() {
+context::VehicleContext& ArchNavCore::context() {
   return context_;
 }
 

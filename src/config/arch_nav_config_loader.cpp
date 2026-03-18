@@ -1,12 +1,12 @@
-#include "config/navigation_config_loader.hpp"
+#include "config/arch_nav_config_loader.hpp"
 
 #include <yaml-cpp/yaml.h>
 
 namespace arch_nav::config {
 
-NavigationConfig NavigationConfigLoader::load_from(const std::string& path) {
+ArchNavConfig ArchNavConfigLoader::load_from(const std::string& path) {
   const YAML::Node root = YAML::LoadFile(path);
-  NavigationConfig config;
+  ArchNavConfig config;
 
   config.driver = root["driver"].as<std::string>();
   if (root["driver_config_path"]) {
