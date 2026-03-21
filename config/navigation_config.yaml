@@ -1,4 +1,4 @@
-driver: "px4"
+driver: "mavros"
 local_planner:
   max_linear_velocity: 2.0        # m/s
   max_linear_acceleration: 1.0   # m/s²

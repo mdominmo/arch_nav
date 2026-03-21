@@ -5,23 +5,22 @@
 
 namespace arch_nav::vehicle {
 
-using constants::VehicleStatusStates;
+using constants::ArmState;
+using constants::ControlState;
 
 struct VehicleStatus {
-  VehicleStatusStates nav_state;
-  VehicleStatusStates arm_state;
+  ControlState control_state;
+  ArmState     arm_state;
 
   explicit VehicleStatus(
-      VehicleStatusStates nav_state_value = VehicleStatusStates::STATE_UNKNOWN,
-      VehicleStatusStates arm_state_value = VehicleStatusStates::STATE_UNKNOWN)
-      : nav_state(nav_state_value), arm_state(arm_state_value) {}
+      ControlState control_state_value = ControlState::UNKNOWN,
+      ArmState arm_state_value = ArmState::UNKNOWN)
+      : control_state(control_state_value), arm_state(arm_state_value) {}
 
   bool is_valid() const {
-    return nav_state != VehicleStatusStates::STATE_UNKNOWN &&
-           arm_state != VehicleStatusStates::STATE_UNKNOWN;
+    return control_state != ControlState::UNKNOWN &&
+           arm_state != ArmState::UNKNOWN;
   }
-
-
 };
 
 }  // namespace arch_nav::vehicle

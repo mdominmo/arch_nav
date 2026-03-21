@@ -9,7 +9,7 @@
 #include "states/iddle_state.hpp"
 #include "states/running_state.hpp"
 #include "tasks/land_task.hpp"
-#include "tasks/point_to_point_task.hpp"
+#include "tasks/takeoff_task.hpp"
 #include "tasks/waypoint_task.hpp"
 
 namespace arch_nav::controller {
@@ -35,14 +35,11 @@ OperationalController::OperationalController(
 OperationalController::~OperationalController() = default;
 
 void OperationalController::takeoff(double height) {
-  const auto current = state_manager_.get_kinematic();
-  auto task = std::make_unique<PointToPointTask>(
-      current.x, current.y, current.z - height, current.heading);
-  current_state_->try_execute(*this, std::move(task));
+  current_state_->try_execute(*this, std::make_unique<TakeoffTask>(height));
 }
 
 void OperationalController::land() {
-  current_state_->try_execute(*this, std::make_unique<LandTask>(planner_.land_descent_velocity()));
+  current_state_->try_execute(*this, std::make_unique<LandTask>());
 }
 
 void OperationalController::waypoint_following(

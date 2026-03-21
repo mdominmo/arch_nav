@@ -4,7 +4,7 @@
 
 Platform-agnostic UAV navigation kernel. Handles trajectory planning, vehicle state management, and operation control with zero dependency on any specific autopilot or middleware.
 
-The kernel exposes a single entry point (`ArchNav`) and a single API object (`NavigationApi`). All platform-specific knowledge — ROS 2, PX4, MAVLink, or anything else — lives entirely inside external drivers that self-register at startup via `DriverRegistry`.
+The kernel exposes a single entry point (`ArchNav`) and a single API object (`ArchNavApi`). All platform-specific knowledge — ROS 2, PX4, MAVLink, or anything else — lives entirely inside external drivers that self-register at startup via `DriverRegistry`.
 
 ## Usage
 
@@ -15,7 +15,7 @@ The kernel exposes a single entry point (`ArchNav`) and a single API object (`Na
 auto arch_nav = arch_nav::ArchNav::create("/path/to/navigation_config.yaml");
 
 // 2. Use the API
-arch_nav::NavigationApi& api = arch_nav->api();
+arch_nav::ArchNavApi& api = arch_nav->api();
 
 api.arm();
 api.takeoff(5.0);                          // metres AGL

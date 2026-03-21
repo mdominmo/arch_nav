@@ -17,7 +17,7 @@ add_library(${PROJECT_NAME} SHARED
   src/core/controller/states/iddle_state.cpp
   src/core/controller/states/running_state.cpp
   src/core/controller/tasks/land_task.cpp
-  src/core/controller/tasks/point_to_point_task.cpp
+  src/core/controller/tasks/takeoff_task.cpp
   src/core/controller/tasks/waypoint_task.cpp
   src/core/context/vehicle_context.cpp
   src/core/planner/kinematic_point_to_point_local_planner.cpp

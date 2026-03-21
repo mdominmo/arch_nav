@@ -1,21 +1,23 @@
-#include "land_task.hpp"
+#include "takeoff_task.hpp"
 
 namespace arch_nav::controller {
 
-void LandTask::start(
+TakeoffTask::TakeoffTask(double height) : height_(height) {}
+
+void TakeoffTask::start(
     context::VehicleContext&,
     planner::ILocalPlanner&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
-  dispatcher.execute_land(std::move(on_complete));
+  dispatcher.execute_takeoff(height_, std::move(on_complete));
 }
 
-void LandTask::abort() {
+void TakeoffTask::abort() {
   if (dispatcher_) dispatcher_->stop();
 }
 
-std::shared_ptr<report::OperationReport> LandTask::make_report() {
+std::shared_ptr<report::OperationReport> TakeoffTask::make_report() {
   return std::make_shared<report::OperationReport>();
 }
 

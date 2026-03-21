@@ -14,11 +14,11 @@ namespace arch_nav::controller {
 void OperationalController::IddleState::on_vehicle_status_update(
     OperationalController& ctx, const vehicle::VehicleStatus& status) {
   if (!status.is_valid() ||
-      status.nav_state != constants::VehicleStatusStates::STATE_OFFBOARD) {
+      status.control_state != constants::ControlState::KERNEL_CONTROLLED) {
     ctx.change_state(
         std::make_unique<HandoverState>(),
         constants::OperationStatus::HANDOVER);
-  } else if (status.arm_state != constants::VehicleStatusStates::STATE_ARMED) {
+  } else if (status.arm_state != constants::ArmState::ARMED) {
     ctx.change_state(
         std::make_unique<DisarmedState>(),
         constants::OperationStatus::DISARMED);

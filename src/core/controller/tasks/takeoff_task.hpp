@@ -1,15 +1,13 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__POINT_TO_POINT_TASK_HPP_
-#define NAVIGATION__CORE__CONTROLLER__POINT_TO_POINT_TASK_HPP_
-
-#include <functional>
+#ifndef NAVIGATION__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
+#define NAVIGATION__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
 
 #include "core/controller/navigation_task.hpp"
 
 namespace arch_nav::controller {
 
-class PointToPointTask : public NavigationTask {
+class TakeoffTask : public NavigationTask {
  public:
-  PointToPointTask(double x, double y, double z, double heading);
+  explicit TakeoffTask(double height);
 
   void start(
       context::VehicleContext& context,
@@ -22,13 +20,10 @@ class PointToPointTask : public NavigationTask {
   std::shared_ptr<report::OperationReport> make_report() override;
 
  private:
-  double target_x_;
-  double target_y_;
-  double target_z_;
-  double target_heading_;
+  double height_;
   dispatchers::ICommandDispatcher* dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__POINT_TO_POINT_TASK_HPP_
+#endif  // NAVIGATION__CORE__CONTROLLER__TAKEOFF_TASK_HPP_

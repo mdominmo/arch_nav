@@ -7,8 +7,6 @@ namespace arch_nav::controller {
 
 class LandTask : public NavigationTask {
  public:
-  explicit LandTask(double descent_velocity);
-
   void start(
       context::VehicleContext& context,
       planner::ILocalPlanner& planner,
@@ -20,7 +18,6 @@ class LandTask : public NavigationTask {
   std::shared_ptr<report::OperationReport> make_report() override;
 
  private:
-  double descent_velocity_;
   dispatchers::ICommandDispatcher* dispatcher_{nullptr};
 };
 

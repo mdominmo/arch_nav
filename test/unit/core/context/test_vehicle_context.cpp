@@ -4,7 +4,8 @@
 
 #include "core/context/vehicle_context.hpp"
 
-using arch_nav::constants::VehicleStatusStates;
+using arch_nav::constants::ArmState;
+using arch_nav::constants::ControlState;
 using arch_nav::context::VehicleContext;
 using arch_nav::vehicle::Kinematics;
 using arch_nav::vehicle::GlobalPosition;
@@ -43,17 +44,15 @@ TEST(VehicleContext, UpdateKinematicSkipsNaN) {
 
 TEST(VehicleContext, UpdateVehicleStatus) {
   VehicleContext manager;
-  VehicleStatus state(VehicleStatusStates::STATE_HOLD,
-                           VehicleStatusStates::STATE_ARMED);
+  VehicleStatus state(ControlState::KERNEL_CONTROLLED, ArmState::ARMED);
   manager.update(state);
   auto vs = manager.get_vehicle_status();
-  EXPECT_EQ(vs.nav_state, VehicleStatusStates::STATE_HOLD);
-  EXPECT_EQ(vs.arm_state, VehicleStatusStates::STATE_ARMED);
+  EXPECT_EQ(vs.control_state, ControlState::KERNEL_CONTROLLED);
+  EXPECT_EQ(vs.arm_state, ArmState::ARMED);
 
-  VehicleStatus state2(VehicleStatusStates::STATE_UNKNOWN,
-                            VehicleStatusStates::STATE_UNKNOWN);
+  VehicleStatus state2(ControlState::UNKNOWN, ArmState::UNKNOWN);
   manager.update(state2);
   vs = manager.get_vehicle_status();
-  EXPECT_EQ(vs.nav_state, VehicleStatusStates::STATE_UNKNOWN);
-  EXPECT_EQ(vs.arm_state, VehicleStatusStates::STATE_UNKNOWN);
+  EXPECT_EQ(vs.control_state, ControlState::UNKNOWN);
+  EXPECT_EQ(vs.arm_state, ArmState::UNKNOWN);
 }

@@ -40,14 +40,14 @@ void OperationalController::RunningState::try_stop(OperationalController& ctx) {
 void OperationalController::RunningState::on_vehicle_status_update(
     OperationalController& ctx, const vehicle::VehicleStatus& status) {
   if (status.is_valid() &&
-      status.nav_state == constants::VehicleStatusStates::STATE_OFFBOARD &&
-      status.arm_state == constants::VehicleStatusStates::STATE_ARMED) {
+      status.control_state == constants::ControlState::KERNEL_CONTROLLED &&
+      status.arm_state == constants::ArmState::ARMED) {
     return;
   }
   task_->abort();
   ctx.last_report_->abort();
   if (!status.is_valid() ||
-      status.nav_state != constants::VehicleStatusStates::STATE_OFFBOARD) {
+      status.control_state != constants::ControlState::KERNEL_CONTROLLED) {
     ctx.change_state(
         std::make_unique<HandoverState>(),
         constants::OperationStatus::HANDOVER);

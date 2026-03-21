@@ -20,14 +20,14 @@ void OperationalController::DisarmedState::try_command(
 void OperationalController::DisarmedState::on_vehicle_status_update(
     OperationalController& ctx, const vehicle::VehicleStatus& status) {
   if (status.is_valid() &&
-      status.nav_state == constants::VehicleStatusStates::STATE_OFFBOARD &&
-      status.arm_state == constants::VehicleStatusStates::STATE_ARMED) {
+      status.control_state == constants::ControlState::KERNEL_CONTROLLED &&
+      status.arm_state == constants::ArmState::ARMED) {
     if (cmd_) { cmd_->cancel(ctx.dispatcher_); cmd_.reset(); }
     ctx.change_state(
         std::make_unique<IddleState>(),
         constants::OperationStatus::IDDLE);
   } else if (!status.is_valid() ||
-             status.nav_state != constants::VehicleStatusStates::STATE_OFFBOARD) {
+             status.control_state != constants::ControlState::KERNEL_CONTROLLED) {
     if (cmd_) { cmd_->cancel(ctx.dispatcher_); cmd_.reset(); }
     ctx.change_state(
         std::make_unique<HandoverState>(),
