@@ -5,20 +5,18 @@
 #include <memory>
 #include <vector>
 
-#include "geographic_msgs/msg/geo_pose.hpp"
-
 #include "core/controller/navigation_task.hpp"
 #include "core/model/report/waypoint_report.hpp"
+#include "core/model/vehicle/geo_waypoint.hpp"
 
 namespace arch_nav::controller {
 
 class WaypointTask : public NavigationTask {
  public:
-  explicit WaypointTask(std::vector<geographic_msgs::msg::GeoPose> waypoints);
+  explicit WaypointTask(std::vector<vehicle::GeoWaypoint> waypoints);
 
   void start(
       context::VehicleContext& context,
-      planner::ILocalPlanner& planner,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
@@ -27,9 +25,9 @@ class WaypointTask : public NavigationTask {
   std::shared_ptr<report::OperationReport> make_report() override;
 
  private:
-  std::vector<geographic_msgs::msg::GeoPose>  waypoints_;
-  std::shared_ptr<report::WaypointReport>     report_;
-  dispatchers::ICommandDispatcher*            dispatcher_{nullptr};
+  std::vector<vehicle::GeoWaypoint>          waypoints_;
+  std::shared_ptr<report::WaypointReport>    report_;
+  dispatchers::ICommandDispatcher*           dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller

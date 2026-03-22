@@ -9,23 +9,21 @@
 #include "core/model/report/operation_report.hpp"
 #include "core/controller/vehicle_command.hpp"
 #include "core/context/vehicle_context.hpp"
+#include "core/model/vehicle/geo_waypoint.hpp"
 #include "core/model/vehicle/vehicle_status.hpp"
-#include "core/planner/local_planner.hpp"
 #include "dispatchers/i_command_dispatcher.hpp"
-#include "geographic_msgs/msg/geo_pose.hpp"
 
 namespace arch_nav::controller {
 
 class OperationalController {
  public:
   explicit OperationalController(
-      context::VehicleContext& state_manager,
-      planner::ILocalPlanner& planner,
+      context::VehicleContext& vehicle_context,
       dispatchers::ICommandDispatcher& dispatcher);
 
   ~OperationalController();
 
-  void waypoint_following(std::vector<geographic_msgs::msg::GeoPose> waypoints);
+  void waypoint_following(std::vector<vehicle::GeoWaypoint> waypoints);
   void takeoff(double height);
   void land();
   void stop();
@@ -50,14 +48,13 @@ class OperationalController {
 
   struct HandoverState;
   struct DisarmedState;
-  struct IddleState;
+  struct IdleState;
   struct RunningState;
 
   void on_vehicle_status_update(const vehicle::VehicleStatus& status);
   void change_state(std::unique_ptr<State> new_state, constants::OperationStatus status);
 
-  context::VehicleContext&                   state_manager_;
-  planner::ILocalPlanner&                    planner_;
+  context::VehicleContext&                   vehicle_context_;
   dispatchers::ICommandDispatcher&           dispatcher_;
   std::unique_ptr<State>                     current_state_;
   constants::OperationStatus                 current_status_;

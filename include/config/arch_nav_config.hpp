@@ -3,14 +3,11 @@
 
 #include <string>
 
-#include "config/local_planner_config.hpp"
-
 namespace arch_nav::config {
 
 struct ArchNavConfig {
-  std::string        driver;
-  std::string        driver_config_path;
-  LocalPlannerConfig local_planner;
+  std::string driver;
+  std::string driver_config_path;
 };
 
 }  // namespace arch_nav::config

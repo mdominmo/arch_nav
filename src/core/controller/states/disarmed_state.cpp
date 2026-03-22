@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "handover_state.hpp"
-#include "iddle_state.hpp"
+#include "idle_state.hpp"
 
 #include "core/constants/operation_status.hpp"
 #include "core/constants/vehicle_status_states.hpp"
@@ -24,8 +24,8 @@ void OperationalController::DisarmedState::on_vehicle_status_update(
       status.arm_state == constants::ArmState::ARMED) {
     if (cmd_) { cmd_->cancel(ctx.dispatcher_); cmd_.reset(); }
     ctx.change_state(
-        std::make_unique<IddleState>(),
-        constants::OperationStatus::IDDLE);
+        std::make_unique<IdleState>(),
+        constants::OperationStatus::IDLE);
   } else if (!status.is_valid() ||
              status.control_state != constants::ControlState::KERNEL_CONTROLLED) {
     if (cmd_) { cmd_->cancel(ctx.dispatcher_); cmd_.reset(); }

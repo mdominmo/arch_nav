@@ -14,7 +14,7 @@ void ArchNavApi::land() {
 }
 
 void ArchNavApi::waypoint_following(
-    std::vector<geographic_msgs::msg::GeoPose> waypoints) {
+    std::vector<vehicle::GeoWaypoint> waypoints) {
   controller_.waypoint_following(std::move(waypoints));
 }
 

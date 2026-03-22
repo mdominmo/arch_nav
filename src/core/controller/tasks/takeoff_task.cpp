@@ -6,7 +6,6 @@ TakeoffTask::TakeoffTask(double height) : height_(height) {}
 
 void TakeoffTask::start(
     context::VehicleContext&,
-    planner::ILocalPlanner&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;

@@ -11,7 +11,6 @@ class TakeoffTask : public NavigationTask {
 
   void start(
       context::VehicleContext& context,
-      planner::ILocalPlanner& planner,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 

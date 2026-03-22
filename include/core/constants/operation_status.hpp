@@ -8,7 +8,7 @@ namespace arch_nav::constants {
 enum class OperationStatus : int32_t {
   HANDOVER = -2,
   DISARMED = -1,
-  IDDLE    =  0,
+  IDLE     =  0,
   RUNNING  =  1,
   FAILED   =  2
 };

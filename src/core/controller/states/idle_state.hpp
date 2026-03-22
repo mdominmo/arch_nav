@@ -1,11 +1,11 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__IDDLE_STATE_HPP_
-#define NAVIGATION__CORE__CONTROLLER__IDDLE_STATE_HPP_
+#ifndef NAVIGATION__CORE__CONTROLLER__IDLE_STATE_HPP_
+#define NAVIGATION__CORE__CONTROLLER__IDLE_STATE_HPP_
 
 #include "core/controller/operational_controller.hpp"
 
 namespace arch_nav::controller {
 
-struct OperationalController::IddleState : OperationalController::State {
+struct OperationalController::IdleState : OperationalController::State {
   void on_vehicle_status_update(
       OperationalController& ctx,
       const vehicle::VehicleStatus& status) override;
@@ -19,4 +19,4 @@ struct OperationalController::IddleState : OperationalController::State {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__IDDLE_STATE_HPP_
+#endif  // NAVIGATION__CORE__CONTROLLER__IDLE_STATE_HPP_

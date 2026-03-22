@@ -4,7 +4,6 @@ namespace arch_nav::controller {
 
 void LandTask::start(
     context::VehicleContext&,
-    planner::ILocalPlanner&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;

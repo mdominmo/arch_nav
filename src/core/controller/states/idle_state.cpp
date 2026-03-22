@@ -1,4 +1,4 @@
-#include "iddle_state.hpp"
+#include "idle_state.hpp"
 
 #include <memory>
 
@@ -11,7 +11,7 @@
 
 namespace arch_nav::controller {
 
-void OperationalController::IddleState::on_vehicle_status_update(
+void OperationalController::IdleState::on_vehicle_status_update(
     OperationalController& ctx, const vehicle::VehicleStatus& status) {
   if (!status.is_valid() ||
       status.control_state != constants::ControlState::KERNEL_CONTROLLED) {
@@ -25,14 +25,14 @@ void OperationalController::IddleState::on_vehicle_status_update(
   }
 }
 
-void OperationalController::IddleState::try_execute(
+void OperationalController::IdleState::try_execute(
     OperationalController& ctx, std::unique_ptr<NavigationTask> task) {
   ctx.change_state(
       std::make_unique<RunningState>(std::move(task)),
       constants::OperationStatus::RUNNING);
 }
 
-void OperationalController::IddleState::try_command(
+void OperationalController::IdleState::try_command(
     OperationalController& ctx, std::unique_ptr<VehicleCommand> cmd) {
   cmd->execute(ctx.dispatcher_);
 }

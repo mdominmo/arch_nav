@@ -2,20 +2,9 @@
 
 namespace arch_nav {
 
-ArchNavCore::ArchNavCore(
-    dispatchers::ICommandDispatcher& dispatcher,
-    const config::LocalPlannerConfig& config)
+ArchNavCore::ArchNavCore(dispatchers::ICommandDispatcher& dispatcher)
     : context_()
-    , planner_(
-          config.max_linear_velocity,
-          config.max_linear_acceleration,
-          config.max_angular_velocity,
-          config.max_angular_acceleration,
-          config.max_vertical_velocity,
-          config.max_vertical_acceleration,
-          config.time_step,
-          config.land_descent_velocity)
-    , controller_(context_, planner_, dispatcher)
+    , controller_(context_, dispatcher)
     , api_(controller_) {}
 
 ArchNavApi& ArchNavCore::api() {

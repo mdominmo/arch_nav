@@ -4,7 +4,7 @@
 
 #include "disarmed_state.hpp"
 #include "handover_state.hpp"
-#include "iddle_state.hpp"
+#include "idle_state.hpp"
 
 #include "core/constants/operation_status.hpp"
 #include "core/constants/vehicle_status_states.hpp"
@@ -18,14 +18,13 @@ OperationalController::RunningState::RunningState(
 void OperationalController::RunningState::on_enter(OperationalController& ctx) {
   ctx.last_report_ = task_->make_report();
   task_->start(
-      ctx.state_manager_,
-      ctx.planner_,
+      ctx.vehicle_context_,
       ctx.dispatcher_,
       [&ctx]() {
         ctx.last_report_->complete();
         ctx.change_state(
-            std::make_unique<IddleState>(),
-            constants::OperationStatus::IDDLE);
+            std::make_unique<IdleState>(),
+            constants::OperationStatus::IDLE);
       });
 }
 
@@ -33,8 +32,8 @@ void OperationalController::RunningState::try_stop(OperationalController& ctx) {
   task_->abort();
   ctx.last_report_->abort();
   ctx.change_state(
-      std::make_unique<IddleState>(),
-      constants::OperationStatus::IDDLE);
+      std::make_unique<IdleState>(),
+      constants::OperationStatus::IDLE);
 }
 
 void OperationalController::RunningState::on_vehicle_status_update(

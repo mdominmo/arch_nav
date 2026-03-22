@@ -6,7 +6,7 @@
 #include "commands/disarm_command.hpp"
 #include "states/disarmed_state.hpp"
 #include "states/handover_state.hpp"
-#include "states/iddle_state.hpp"
+#include "states/idle_state.hpp"
 #include "states/running_state.hpp"
 #include "tasks/land_task.hpp"
 #include "tasks/takeoff_task.hpp"
@@ -15,18 +15,16 @@
 namespace arch_nav::controller {
 
 OperationalController::OperationalController(
-    context::VehicleContext& state_manager,
-    planner::ILocalPlanner& planner,
+    context::VehicleContext& vehicle_context,
     dispatchers::ICommandDispatcher& dispatcher)
-    : state_manager_(state_manager),
-      planner_(planner),
+    : vehicle_context_(vehicle_context),
       dispatcher_(dispatcher),
       current_state_(nullptr),
       current_status_(constants::OperationStatus::HANDOVER) {
   change_state(
       std::make_unique<HandoverState>(),
       constants::OperationStatus::HANDOVER);
-  state_manager_.subscribe_vehicle_status(
+  vehicle_context_.subscribe_vehicle_status(
       [this](const vehicle::VehicleStatus& status) {
         on_vehicle_status_update(status);
       });
@@ -43,7 +41,7 @@ void OperationalController::land() {
 }
 
 void OperationalController::waypoint_following(
-    std::vector<geographic_msgs::msg::GeoPose> waypoints) {
+    std::vector<vehicle::GeoWaypoint> waypoints) {
   auto task = std::make_unique<WaypointTask>(std::move(waypoints));
   current_state_->try_execute(*this, std::move(task));
 }

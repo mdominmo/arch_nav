@@ -4,8 +4,8 @@
 #include <functional>
 #include <vector>
 
+#include "core/model/vehicle/geo_waypoint.hpp"
 #include "core/model/vehicle/trajectory_point.hpp"
-#include "geographic_msgs/msg/geo_pose.hpp"
 
 namespace arch_nav::dispatchers {
 
@@ -14,7 +14,7 @@ class ICommandDispatcher {
   virtual void execute_takeoff(double height, std::function<void()> on_complete) = 0;
   virtual void execute_land(std::function<void()> on_complete) = 0;
   virtual void execute_waypoint_following(
-      std::vector<geographic_msgs::msg::GeoPose> waypoints,
+      std::vector<vehicle::GeoWaypoint> waypoints,
       std::function<void()> on_complete) = 0;
 
   virtual void execute_trajectory(

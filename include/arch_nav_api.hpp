@@ -6,7 +6,7 @@
 #include "core/constants/operation_status.hpp"
 #include "core/controller/operational_controller.hpp"
 #include "core/model/report/operation_report.hpp"
-#include "geographic_msgs/msg/geo_pose.hpp"
+#include "core/model/vehicle/geo_waypoint.hpp"
 
 namespace arch_nav {
 
@@ -16,7 +16,7 @@ class ArchNavApi {
 
   void takeoff(double height);
   void land();
-  void waypoint_following(std::vector<geographic_msgs::msg::GeoPose> waypoints);
+  void waypoint_following(std::vector<vehicle::GeoWaypoint> waypoints);
   void cancel_operation();
   constants::OperationStatus        operation_status() const;
   const report::OperationReport*  last_operation_report() const;

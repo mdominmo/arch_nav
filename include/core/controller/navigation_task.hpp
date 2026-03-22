@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "core/context/vehicle_context.hpp"
-#include "core/planner/local_planner.hpp"
 #include "core/model/report/operation_report.hpp"
 #include "dispatchers/i_command_dispatcher.hpp"
 
@@ -15,7 +14,6 @@ class NavigationTask {
  public:
   virtual void start(
       context::VehicleContext& context,
-      planner::ILocalPlanner& planner,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) = 0;
 

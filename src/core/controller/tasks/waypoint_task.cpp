@@ -2,13 +2,12 @@
 
 namespace arch_nav::controller {
 
-WaypointTask::WaypointTask(std::vector<geographic_msgs::msg::GeoPose> waypoints)
+WaypointTask::WaypointTask(std::vector<vehicle::GeoWaypoint> waypoints)
     : waypoints_(std::move(waypoints)),
       report_(std::make_shared<report::WaypointReport>(waypoints_.size())) {}
 
 void WaypointTask::start(
     context::VehicleContext&,
-    planner::ILocalPlanner&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;

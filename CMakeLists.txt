@@ -1,132 +1,131 @@
-cmake_minimum_required(VERSION 3.8)
-project(arch-nav)
+cmake_minimum_required(VERSION 3.16)
+project(arch_nav VERSION 0.0.1 LANGUAGES CXX)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
-find_package(geographic_msgs REQUIRED)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 find_package(yaml-cpp REQUIRED)
 
-add_library(${PROJECT_NAME} SHARED
+add_library(arch_nav SHARED
   src/core/controller/operational_controller.cpp
   src/core/controller/states/handover_state.cpp
   src/core/controller/states/disarmed_state.cpp
-  src/core/controller/states/iddle_state.cpp
+  src/core/controller/states/idle_state.cpp
   src/core/controller/states/running_state.cpp
   src/core/controller/tasks/land_task.cpp
   src/core/controller/tasks/takeoff_task.cpp
   src/core/controller/tasks/waypoint_task.cpp
   src/core/context/vehicle_context.cpp
-  src/core/planner/kinematic_point_to_point_local_planner.cpp
   src/utils/gnss_local_frame.cpp
   src/config/arch_nav_config_loader.cpp
   src/arch_nav_api.cpp
   src/arch_nav_core.cpp
   src/platform/driver_registry.cpp
+  src/platform/driver_plugin_loader.cpp
   src/arch_nav.cpp
 )
-target_link_libraries(${PROJECT_NAME} yaml-cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+
+add_library(arch_nav::arch_nav ALIAS arch_nav)
+
+target_compile_features(arch_nav PUBLIC cxx_std_17)
+
+target_link_libraries(arch_nav
+  PUBLIC yaml-cpp
+  PRIVATE ${CMAKE_DL_LIBS}
 )
-ament_target_dependencies(${PROJECT_NAME}
-  ament_index_cpp
-  geographic_msgs
+
+target_include_directories(arch_nav
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_compile_definitions(arch_nav PRIVATE
+  ARCH_NAV_INSTALL_CONFIG_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/arch-nav/config/arch_nav_config.yaml"
+  ARCH_NAV_SOURCE_CONFIG_PATH="${CMAKE_CURRENT_SOURCE_DIR}/config/arch_nav_config.yaml"
+  ARCH_NAV_DEFAULT_DRIVER_SEARCH_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/arch_nav/drivers"
 )
 
 if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
+  include(CTest)
+  find_package(GTest REQUIRED)
 
-  ament_add_gtest(test_global_position
-    test/unit/core/state/test_global_position.cpp
-  )
-  target_include_directories(test_global_position PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_global_position ${PROJECT_NAME})
-  set_tests_properties(test_global_position PROPERTIES
-    LABELS "unit"
-  )
+  function(add_arch_nav_test test_name source_file)
+    add_executable(${test_name} ${source_file})
+    target_link_libraries(${test_name} PRIVATE arch_nav GTest::gtest_main)
+    target_include_directories(${test_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+  endfunction()
 
-  ament_add_gtest(test_kinematics
-    test/unit/core/state/test_kinematics.cpp
-  )
-  target_include_directories(test_kinematics PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_kinematics ${PROJECT_NAME})
-  set_tests_properties(test_kinematics PROPERTIES
-    LABELS "unit"
-  )
+  add_arch_nav_test(test_global_position test/unit/core/state/test_global_position.cpp)
+  add_arch_nav_test(test_kinematics test/unit/core/state/test_kinematics.cpp)
+  add_arch_nav_test(test_vehicle_status test/unit/core/state/test_vehicle_status.cpp)
+  add_arch_nav_test(test_vehicle_context test/unit/core/context/test_vehicle_context.cpp)
 
-  ament_add_gtest(test_vehicle_status
-    test/unit/core/state/test_vehicle_status.cpp
-  )
-  target_include_directories(test_vehicle_status PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_status ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_status PROPERTIES
-    LABELS "unit"
-  )
-
-  ament_add_gtest(test_vehicle_context
-    test/unit/core/context/test_vehicle_context.cpp
-  )
-  target_include_directories(test_vehicle_context PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_vehicle_context ${PROJECT_NAME})
-  set_tests_properties(test_vehicle_context PROPERTIES
-    LABELS "unit"
-  )
-
-  ament_add_gtest(test_kinematic_point_to_point_local_planner
-    test/test_kinematic_point_to_point_local_planner.cpp
-  )
-  target_include_directories(test_kinematic_point_to_point_local_planner PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_kinematic_point_to_point_local_planner ${PROJECT_NAME})
-  set_tests_properties(test_kinematic_point_to_point_local_planner PROPERTIES
-    LABELS "unit"
-  )
-
-  ament_add_gtest(test_gnss_local_frame
-    test/unit/utils/test_gnss_local_frame.cpp
-  )
-  target_include_directories(test_gnss_local_frame PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-  target_link_libraries(test_gnss_local_frame ${PROJECT_NAME})
-  set_tests_properties(test_gnss_local_frame PROPERTIES
-    LABELS "unit"
-  )
+  add_arch_nav_test(test_gnss_local_frame test/unit/utils/test_gnss_local_frame.cpp)
 endif()
 
 install(DIRECTORY include/
-  DESTINATION include
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 install(DIRECTORY config/
-  DESTINATION share/${PROJECT_NAME}/config
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/arch-nav/config
 )
 
-install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+install(TARGETS arch_nav
+  EXPORT arch_navTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME})
-ament_export_dependencies(
-  ament_index_cpp
-  geographic_msgs
+set(ARCH_NAV_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/arch_nav)
+
+install(EXPORT arch_navTargets
+  FILE arch_navTargets.cmake
+  NAMESPACE arch_nav::
+  DESTINATION ${ARCH_NAV_CONFIG_INSTALL_DIR}
 )
 
-ament_package()
+configure_package_config_file(
+  cmake/arch_navConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/arch_navConfig.cmake
+  INSTALL_DESTINATION ${ARCH_NAV_CONFIG_INSTALL_DIR}
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/arch_navConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/arch_navConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/arch_navConfigVersion.cmake
+  DESTINATION ${ARCH_NAV_CONFIG_INSTALL_DIR}
+)
+
+# Auto-discover drivers inside drivers/ subdirectory
+file(GLOB _driver_cmakes "${CMAKE_CURRENT_SOURCE_DIR}/drivers/*/CMakeLists.txt")
+foreach(_driver_cmake ${_driver_cmakes})
+  get_filename_component(_driver_dir ${_driver_cmake} DIRECTORY)
+  add_subdirectory(${_driver_dir})
+endforeach()
+
+# Additional drivers via ARCH_NAV_DRIVERS env var (colon-separated source paths)
+if(DEFINED ENV{ARCH_NAV_DRIVERS})
+  string(REPLACE ":" ";" _extra_drivers "$ENV{ARCH_NAV_DRIVERS}")
+  foreach(_driver_dir ${_extra_drivers})
+    if(EXISTS "${_driver_dir}/CMakeLists.txt")
+      get_filename_component(_driver_name ${_driver_dir} NAME)
+      add_subdirectory(${_driver_dir} ${CMAKE_BINARY_DIR}/drivers/${_driver_name})
+    else()
+      message(WARNING "ARCH_NAV_DRIVERS: no CMakeLists.txt in ${_driver_dir}, skipping")
+    endif()
+  endforeach()
+endif()

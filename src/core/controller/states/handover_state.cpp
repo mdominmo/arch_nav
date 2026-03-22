@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "disarmed_state.hpp"
-#include "iddle_state.hpp"
+#include "idle_state.hpp"
 
 #include "core/constants/operation_status.hpp"
 #include "core/constants/vehicle_status_states.hpp"
@@ -18,8 +18,8 @@ void OperationalController::HandoverState::on_vehicle_status_update(
   }
   if (status.arm_state == constants::ArmState::ARMED) {
     ctx.change_state(
-        std::make_unique<IddleState>(),
-        constants::OperationStatus::IDDLE);
+        std::make_unique<IdleState>(),
+        constants::OperationStatus::IDLE);
   } else {
     ctx.change_state(
         std::make_unique<DisarmedState>(),
