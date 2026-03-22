@@ -17,7 +17,7 @@ sudo rm -rf /usr/local/lib/libarch_nav.so \
             /usr/local/include/platform \
             /usr/local/include/utils \
             /usr/local/share/arch-nav \
-            /usr/local/share/arch-nav-mavsdk-driver
+            /usr/local/share/arch_nav_mavsdk_driver
 sudo ldconfig
 
 echo "Clean complete."

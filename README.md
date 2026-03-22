@@ -1,6 +1,6 @@
 # arch-nav
 
-![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg) ![Version](https://img.shields.io/badge/version-0.0.1-green.svg)
+![License](https://img.shields.io/github/license/mdominmo/arch-nav) ![Version](https://img.shields.io/github/v/release/mdominmo/arch-nav)
 
 Platform-agnostic UAV navigation kernel written in pure C++17. Handles operation control, vehicle state management, and trajectory planning with zero dependency on any specific autopilot, middleware, or framework (no ROS, no MAVLink, no PX4 — nothing).
 
@@ -37,7 +37,7 @@ The kernel `CMakeLists.txt` compiles the kernel library and any drivers found in
 cd arch_nav_ws
 
 # Tell CMake where the driver source code is
-export ARCH_NAV_DRIVERS=$(pwd)/src/arch-nav-mavsdk-driver
+export ARCH_NAV_DRIVERS=$(pwd)/src/arch_nav_mavsdk_driver
 
 # Build
 cmake -B src/arch-nav/build -S src/arch-nav
@@ -58,7 +58,7 @@ Alternatively, drivers can be placed directly inside `src/arch-nav/drivers/` and
 cd arch_nav_ws
 
 # MAVSDK must be installed (see https://mavsdk.mavlink.io/main/en/cpp/guide/installation.html)
-export ARCH_NAV_DRIVERS=$(pwd)/src/arch-nav-mavsdk-driver
+export ARCH_NAV_DRIVERS=$(pwd)/src/arch_nav_mavsdk_driver
 
 cmake -B src/arch-nav/build -S src/arch-nav
 cmake --build src/arch-nav/build -j$(nproc)
