@@ -2,16 +2,20 @@
 
 namespace arch_nav::controller {
 
-WaypointTask::WaypointTask(std::vector<vehicle::GeoWaypoint> waypoints)
+WaypointTask::WaypointTask(
+    std::vector<vehicle::Waypoint> waypoints,
+    constants::ReferenceFrame frame)
     : waypoints_(std::move(waypoints)),
+      frame_(frame),
       report_(std::make_shared<report::WaypointReport>(waypoints_.size())) {}
 
-void WaypointTask::start(
+constants::CommandResponse WaypointTask::start(
     context::VehicleContext&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
-  dispatcher.execute_waypoint_following(std::move(waypoints_), std::move(on_complete));
+  return dispatcher.execute_waypoint_following(
+      std::move(waypoints_), frame_, std::move(on_complete));
 }
 
 void WaypointTask::abort() {

@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__IDLE_STATE_HPP_
-#define NAVIGATION__CORE__CONTROLLER__IDLE_STATE_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__IDLE_STATE_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__IDLE_STATE_HPP_
 
 #include "core/controller/operational_controller.hpp"
 
@@ -9,7 +9,7 @@ struct OperationalController::IdleState : OperationalController::State {
   void on_vehicle_status_update(
       OperationalController& ctx,
       const vehicle::VehicleStatus& status) override;
-  void try_execute(
+  constants::CommandResponse try_execute(
       OperationalController& ctx,
       std::unique_ptr<NavigationTask> task) override;
   void try_command(
@@ -19,4 +19,4 @@ struct OperationalController::IdleState : OperationalController::State {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__IDLE_STATE_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__IDLE_STATE_HPP_

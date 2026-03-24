@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTEXT__VEHICLE_CONTEXT_HPP_
-#define NAVIGATION__CORE__CONTEXT__VEHICLE_CONTEXT_HPP_
+#ifndef ARCH_NAV__CORE__CONTEXT__VEHICLE_CONTEXT_HPP_
+#define ARCH_NAV__CORE__CONTEXT__VEHICLE_CONTEXT_HPP_
 
 #include <functional>
 #include <shared_mutex>
@@ -41,4 +41,4 @@ class VehicleContext {
 
 }  // namespace arch_nav::context
 
-#endif  // NAVIGATION__CORE__CONTEXT__VEHICLE_CONTEXT_HPP_
+#endif  // ARCH_NAV__CORE__CONTEXT__VEHICLE_CONTEXT_HPP_

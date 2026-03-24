@@ -1,9 +1,10 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__NAVIGATION_TASK_HPP_
-#define NAVIGATION__CORE__CONTROLLER__NAVIGATION_TASK_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__NAVIGATION_TASK_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__NAVIGATION_TASK_HPP_
 
 #include <functional>
 #include <memory>
 
+#include "core/constants/command_response.hpp"
 #include "core/context/vehicle_context.hpp"
 #include "core/model/report/operation_report.hpp"
 #include "dispatchers/i_command_dispatcher.hpp"
@@ -12,7 +13,7 @@ namespace arch_nav::controller {
 
 class NavigationTask {
  public:
-  virtual void start(
+  virtual constants::CommandResponse start(
       context::VehicleContext& context,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) = 0;
@@ -26,4 +27,4 @@ class NavigationTask {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__NAVIGATION_TASK_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__NAVIGATION_TASK_HPP_

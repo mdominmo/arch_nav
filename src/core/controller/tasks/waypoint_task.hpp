@@ -1,21 +1,23 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__WAYPOINT_TASK_HPP_
-#define NAVIGATION__CORE__CONTROLLER__WAYPOINT_TASK_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__WAYPOINT_TASK_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__WAYPOINT_TASK_HPP_
 
 #include <functional>
 #include <memory>
 #include <vector>
 
 #include "core/controller/navigation_task.hpp"
+#include "core/constants/reference_frame.hpp"
 #include "core/model/report/waypoint_report.hpp"
-#include "core/model/vehicle/geo_waypoint.hpp"
+#include "core/model/vehicle/waypoint.hpp"
 
 namespace arch_nav::controller {
 
 class WaypointTask : public NavigationTask {
  public:
-  explicit WaypointTask(std::vector<vehicle::GeoWaypoint> waypoints);
+  WaypointTask(std::vector<vehicle::Waypoint> waypoints,
+               constants::ReferenceFrame frame);
 
-  void start(
+  constants::CommandResponse start(
       context::VehicleContext& context,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
@@ -25,11 +27,12 @@ class WaypointTask : public NavigationTask {
   std::shared_ptr<report::OperationReport> make_report() override;
 
  private:
-  std::vector<vehicle::GeoWaypoint>          waypoints_;
-  std::shared_ptr<report::WaypointReport>    report_;
-  dispatchers::ICommandDispatcher*           dispatcher_{nullptr};
+  std::vector<vehicle::Waypoint>          waypoints_;
+  constants::ReferenceFrame               frame_;
+  std::shared_ptr<report::WaypointReport> report_;
+  dispatchers::ICommandDispatcher*        dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__WAYPOINT_TASK_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__WAYPOINT_TASK_HPP_

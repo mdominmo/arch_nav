@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__VEHICLE_COMMAND_HPP_
-#define NAVIGATION__CORE__CONTROLLER__VEHICLE_COMMAND_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__VEHICLE_COMMAND_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__VEHICLE_COMMAND_HPP_
 
 #include "dispatchers/i_command_dispatcher.hpp"
 
@@ -14,4 +14,4 @@ class VehicleCommand {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__VEHICLE_COMMAND_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__VEHICLE_COMMAND_HPP_

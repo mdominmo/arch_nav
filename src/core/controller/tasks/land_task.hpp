@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__LAND_TASK_HPP_
-#define NAVIGATION__CORE__CONTROLLER__LAND_TASK_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__LAND_TASK_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__LAND_TASK_HPP_
 
 #include "core/controller/navigation_task.hpp"
 
@@ -7,7 +7,7 @@ namespace arch_nav::controller {
 
 class LandTask : public NavigationTask {
  public:
-  void start(
+  constants::CommandResponse start(
       context::VehicleContext& context,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
@@ -22,4 +22,4 @@ class LandTask : public NavigationTask {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__LAND_TASK_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__LAND_TASK_HPP_

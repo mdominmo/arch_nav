@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "platform/i_platform_driver.hpp"
 
@@ -22,6 +23,9 @@ class DriverRegistry {
   std::unique_ptr<IPlatformDriver> create(
       const std::string& name,
       const std::string& config_path) const;
+
+  std::vector<std::string> registered_names() const;
+  std::size_t size() const;
 
  private:
   DriverRegistry() = default;

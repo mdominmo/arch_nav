@@ -24,4 +24,17 @@ std::unique_ptr<IPlatformDriver> DriverRegistry::create(
   return it->second(config_path);
 }
 
+std::vector<std::string> DriverRegistry::registered_names() const {
+  std::vector<std::string> names;
+  names.reserve(factories_.size());
+  for (const auto& pair : factories_) {
+    names.push_back(pair.first);
+  }
+  return names;
+}
+
+std::size_t DriverRegistry::size() const {
+  return factories_.size();
+}
+
 }  // namespace arch_nav::platform

@@ -6,6 +6,7 @@
 #include "handover_state.hpp"
 #include "running_state.hpp"
 
+#include "core/constants/command_response.hpp"
 #include "core/constants/operation_status.hpp"
 #include "core/constants/vehicle_status_states.hpp"
 
@@ -18,18 +19,34 @@ void OperationalController::IdleState::on_vehicle_status_update(
     ctx.change_state(
         std::make_unique<HandoverState>(),
         constants::OperationStatus::HANDOVER);
-  } else if (status.arm_state != constants::ArmState::ARMED) {
+    return;
+  }
+
+  if (status.arm_state != constants::ArmState::ARMED) {
     ctx.change_state(
         std::make_unique<DisarmedState>(),
         constants::OperationStatus::DISARMED);
   }
 }
 
-void OperationalController::IdleState::try_execute(
+constants::CommandResponse OperationalController::IdleState::try_execute(
     OperationalController& ctx, std::unique_ptr<NavigationTask> task) {
-  ctx.change_state(
-      std::make_unique<RunningState>(std::move(task)),
-      constants::OperationStatus::RUNNING);
+  auto report = task->make_report();
+  auto response = task->start(
+      ctx.vehicle_context_,
+      ctx.dispatcher_,
+      [&ctx]() { ctx.on_operation_complete(); });
+
+  if (response != constants::CommandResponse::ACCEPTED) {
+    report->fail();
+    ctx.last_report_ = report;
+    return response;
+  }
+
+  ctx.last_report_ = report;
+  ctx.current_state_ = std::make_unique<RunningState>(std::move(task));
+  ctx.current_status_ = constants::OperationStatus::RUNNING;
+  return constants::CommandResponse::ACCEPTED;
 }
 
 void OperationalController::IdleState::try_command(

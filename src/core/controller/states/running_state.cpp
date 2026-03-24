@@ -15,19 +15,6 @@ OperationalController::RunningState::RunningState(
     std::unique_ptr<NavigationTask> task)
     : task_(std::move(task)) {}
 
-void OperationalController::RunningState::on_enter(OperationalController& ctx) {
-  ctx.last_report_ = task_->make_report();
-  task_->start(
-      ctx.vehicle_context_,
-      ctx.dispatcher_,
-      [&ctx]() {
-        ctx.last_report_->complete();
-        ctx.change_state(
-            std::make_unique<IdleState>(),
-            constants::OperationStatus::IDLE);
-      });
-}
-
 void OperationalController::RunningState::try_stop(OperationalController& ctx) {
   task_->abort();
   ctx.last_report_->abort();
@@ -43,18 +30,21 @@ void OperationalController::RunningState::on_vehicle_status_update(
       status.arm_state == constants::ArmState::ARMED) {
     return;
   }
+
   task_->abort();
   ctx.last_report_->abort();
+
   if (!status.is_valid() ||
       status.control_state != constants::ControlState::KERNEL_CONTROLLED) {
     ctx.change_state(
         std::make_unique<HandoverState>(),
         constants::OperationStatus::HANDOVER);
-  } else {
-    ctx.change_state(
-        std::make_unique<DisarmedState>(),
-        constants::OperationStatus::DISARMED);
+    return;
   }
+
+  ctx.change_state(
+      std::make_unique<DisarmedState>(),
+      constants::OperationStatus::DISARMED);
 }
 
 }  // namespace arch_nav::controller

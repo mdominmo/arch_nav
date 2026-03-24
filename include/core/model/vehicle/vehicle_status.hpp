@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__MODEL__VEHICLE__VEHICLE_STATUS_HPP_
-#define NAVIGATION__CORE__MODEL__VEHICLE__VEHICLE_STATUS_HPP_
+#ifndef ARCH_NAV__CORE__MODEL__VEHICLE__VEHICLE_STATUS_HPP_
+#define ARCH_NAV__CORE__MODEL__VEHICLE__VEHICLE_STATUS_HPP_
 
 #include "core/constants/vehicle_status_states.hpp"
 
@@ -25,4 +25,4 @@ struct VehicleStatus {
 
 }  // namespace arch_nav::vehicle
 
-#endif  // NAVIGATION__CORE__MODEL__VEHICLE__VEHICLE_STATUS_HPP_
+#endif  // ARCH_NAV__CORE__MODEL__VEHICLE__VEHICLE_STATUS_HPP_

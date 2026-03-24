@@ -8,8 +8,6 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-find_package(yaml-cpp REQUIRED)
-
 add_library(arch_nav SHARED
   src/core/controller/operational_controller.cpp
   src/core/controller/states/handover_state.cpp
@@ -19,9 +17,10 @@ add_library(arch_nav SHARED
   src/core/controller/tasks/land_task.cpp
   src/core/controller/tasks/takeoff_task.cpp
   src/core/controller/tasks/waypoint_task.cpp
+  src/core/controller/tasks/trajectory_execution_task.cpp
   src/core/context/vehicle_context.cpp
   src/utils/gnss_local_frame.cpp
-  src/config/arch_nav_config_loader.cpp
+  src/utils/frame_converter.cpp
   src/arch_nav_api.cpp
   src/arch_nav_core.cpp
   src/platform/driver_registry.cpp
@@ -34,7 +33,6 @@ add_library(arch_nav::arch_nav ALIAS arch_nav)
 target_compile_features(arch_nav PUBLIC cxx_std_17)
 
 target_link_libraries(arch_nav
-  PUBLIC yaml-cpp
   PRIVATE ${CMAKE_DL_LIBS}
 )
 
@@ -45,8 +43,6 @@ target_include_directories(arch_nav
 )
 
 target_compile_definitions(arch_nav PRIVATE
-  ARCH_NAV_INSTALL_CONFIG_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/arch-nav/config/arch_nav_config.yaml"
-  ARCH_NAV_SOURCE_CONFIG_PATH="${CMAKE_CURRENT_SOURCE_DIR}/config/arch_nav_config.yaml"
   ARCH_NAV_DEFAULT_DRIVER_SEARCH_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/arch_nav/drivers"
 )
 
@@ -71,10 +67,6 @@ endif()
 
 install(DIRECTORY include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-install(DIRECTORY config/
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/arch-nav/config
 )
 
 install(TARGETS arch_nav

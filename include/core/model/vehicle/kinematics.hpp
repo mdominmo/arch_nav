@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__MODEL__VEHICLE__KINEMATICS_HPP_
-#define NAVIGATION__CORE__MODEL__VEHICLE__KINEMATICS_HPP_
+#ifndef ARCH_NAV__CORE__MODEL__VEHICLE__KINEMATICS_HPP_
+#define ARCH_NAV__CORE__MODEL__VEHICLE__KINEMATICS_HPP_
 
 #include <cmath>
 #include <limits>
@@ -66,4 +66,4 @@ struct Kinematics {
 
 }  // namespace arch_nav::vehicle
 
-#endif  // NAVIGATION__CORE__MODEL__VEHICLE__KINEMATICS_HPP_
+#endif  // ARCH_NAV__CORE__MODEL__VEHICLE__KINEMATICS_HPP_

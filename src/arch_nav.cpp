@@ -4,45 +4,45 @@
 #include <stdexcept>
 #include <string>
 
-#include <unistd.h>
-
 #include "arch_nav_core.hpp"
-#include "config/arch_nav_config_loader.hpp"
 #include "platform/driver_plugin_loader.hpp"
 #include "platform/driver_registry.hpp"
 
 namespace arch_nav {
 namespace {
 
-bool is_readable_file(const std::string& path) {
-  return path.empty() == false && access(path.c_str(), R_OK) == 0;
+std::string resolve_driver_name(const platform::DriverRegistry& registry) {
+  const char* env = std::getenv("ARCH_NAV_DRIVER");
+  if (env != nullptr && env[0] != '\0') {
+    return std::string(env);
+  }
+
+  if (registry.size() == 0) {
+    throw std::runtime_error(
+        "No drivers registered. Install a driver plugin or set ARCH_NAV_DRIVERS at build time.");
+  }
+
+  if (registry.size() == 1) {
+    return registry.registered_names().front();
+  }
+
+  auto names = registry.registered_names();
+  std::string list;
+  for (const auto& n : names) {
+    if (!list.empty()) list += ", ";
+    list += n;
+  }
+  throw std::runtime_error(
+      "Multiple drivers registered (" + list +
+      "). Set ARCH_NAV_DRIVER to select one.");
 }
 
-std::string resolve_default_config_path() {
-  const char* env_path = std::getenv("ARCH_NAV_CONFIG_PATH");
-  if (env_path != nullptr && is_readable_file(env_path)) {
-    return std::string(env_path);
+std::string resolve_driver_config() {
+  const char* env = std::getenv("ARCH_NAV_DRIVER_CONFIG");
+  if (env != nullptr && env[0] != '\0') {
+    return std::string(env);
   }
-
-#ifdef ARCH_NAV_INSTALL_CONFIG_PATH
-  if (is_readable_file(ARCH_NAV_INSTALL_CONFIG_PATH)) {
-    return ARCH_NAV_INSTALL_CONFIG_PATH;
-  }
-#endif
-
-#ifdef ARCH_NAV_SOURCE_CONFIG_PATH
-  if (is_readable_file(ARCH_NAV_SOURCE_CONFIG_PATH)) {
-    return ARCH_NAV_SOURCE_CONFIG_PATH;
-  }
-#endif
-
-  static const char* kRelativeDefault = "config/arch_nav_config.yaml";
-  if (is_readable_file(kRelativeDefault)) {
-    return kRelativeDefault;
-  }
-
-  throw std::runtime_error(
-      "No default navigation config found. Set ARCH_NAV_CONFIG_PATH or call ArchNav::create(path).");
+  return {};
 }
 
 }  // namespace
@@ -57,18 +57,14 @@ ArchNav::ArchNav(std::unique_ptr<Impl> impl)
     : impl_(std::move(impl)) {}
 
 std::unique_ptr<ArchNav> ArchNav::create() {
-  return create(resolve_default_config_path());
-}
-
-std::unique_ptr<ArchNav> ArchNav::create(const std::string& config_path) {
-  auto config = config::ArchNavConfigLoader::load_from(config_path);
-
   auto impl = std::make_unique<Impl>();
   impl->plugin_loader.load_all();
 
-  impl->driver = platform::DriverRegistry::instance().create(
-      config.driver,
-      config.driver_config_path);
+  auto& registry = platform::DriverRegistry::instance();
+  const auto driver_name   = resolve_driver_name(registry);
+  const auto driver_config = resolve_driver_config();
+
+  impl->driver = registry.create(driver_name, driver_config);
 
   impl->core = std::make_unique<ArchNavCore>(
       impl->driver->dispatcher());

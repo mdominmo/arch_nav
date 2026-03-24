@@ -11,6 +11,7 @@
 #include "tasks/land_task.hpp"
 #include "tasks/takeoff_task.hpp"
 #include "tasks/waypoint_task.hpp"
+#include "tasks/trajectory_execution_task.hpp"
 
 namespace arch_nav::controller {
 
@@ -32,43 +33,74 @@ OperationalController::OperationalController(
 
 OperationalController::~OperationalController() = default;
 
-void OperationalController::takeoff(double height) {
-  current_state_->try_execute(*this, std::make_unique<TakeoffTask>(height));
+constants::CommandResponse OperationalController::takeoff(
+    double height, constants::ReferenceFrame frame) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_execute(
+      *this, std::make_unique<TakeoffTask>(height, frame));
 }
 
-void OperationalController::land() {
-  current_state_->try_execute(*this, std::make_unique<LandTask>());
+constants::CommandResponse OperationalController::land() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_execute(
+      *this, std::make_unique<LandTask>());
 }
 
-void OperationalController::waypoint_following(
-    std::vector<vehicle::GeoWaypoint> waypoints) {
-  auto task = std::make_unique<WaypointTask>(std::move(waypoints));
-  current_state_->try_execute(*this, std::move(task));
+constants::CommandResponse OperationalController::waypoint_following(
+    std::vector<vehicle::Waypoint> waypoints,
+    constants::ReferenceFrame frame) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_execute(
+      *this, std::make_unique<WaypointTask>(std::move(waypoints), frame));
+}
+
+constants::CommandResponse OperationalController::trajectory_execution(
+    std::vector<vehicle::TrajectoryPoint> trajectory,
+    constants::ReferenceFrame frame) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_execute(
+      *this, std::make_unique<TrajectoryExecutionTask>(std::move(trajectory), frame));
 }
 
 void OperationalController::stop() {
+  std::lock_guard<std::mutex> lock(mutex_);
   current_state_->try_stop(*this);
 }
 
-void OperationalController::arm() {
+constants::CommandResponse OperationalController::arm() {
+  std::lock_guard<std::mutex> lock(mutex_);
   current_state_->try_command(*this, std::make_unique<ArmCommand>());
+  return constants::CommandResponse::ACCEPTED;
 }
 
-void OperationalController::disarm() {
+constants::CommandResponse OperationalController::disarm() {
+  std::lock_guard<std::mutex> lock(mutex_);
   current_state_->try_command(*this, std::make_unique<DisarmCommand>());
+  return constants::CommandResponse::ACCEPTED;
 }
 
 constants::OperationStatus OperationalController::operation_status() const {
+  std::lock_guard<std::mutex> lock(mutex_);
   return current_status_;
 }
 
 const report::OperationReport* OperationalController::last_operation_report() const {
+  std::lock_guard<std::mutex> lock(mutex_);
   return last_report_.get();
 }
 
 void OperationalController::on_vehicle_status_update(
     const vehicle::VehicleStatus& status) {
+  std::lock_guard<std::mutex> lock(mutex_);
   current_state_->on_vehicle_status_update(*this, status);
+}
+
+void OperationalController::on_operation_complete() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (last_report_) last_report_->complete();
+  change_state(
+      std::make_unique<IdleState>(),
+      constants::OperationStatus::IDLE);
 }
 
 void OperationalController::change_state(

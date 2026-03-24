@@ -19,4 +19,18 @@ double alt_to_ned_z(double alt, double ref_alt) {
   return -(alt - ref_alt);
 }
 
+static constexpr double kRadToDeg = 180.0 / M_PI;
+
+double ned_x_to_lat(double x, double ref_lat) {
+  return ref_lat + (x / kEarthRadius) * kRadToDeg;
+}
+
+double ned_y_to_lon(double y, double ref_lon, double ref_lat) {
+  return ref_lon + (y / (kEarthRadius * std::cos(ref_lat * kDegToRad))) * kRadToDeg;
+}
+
+double ned_z_to_alt(double z, double ref_alt) {
+  return ref_alt - z;
+}
+
 }  // namespace arch_nav::utils::gnss_local_frame

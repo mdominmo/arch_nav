@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__DISARMED_STATE_HPP_
-#define NAVIGATION__CORE__CONTROLLER__DISARMED_STATE_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__DISARMED_STATE_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__DISARMED_STATE_HPP_
 
 #include <memory>
 
@@ -22,4 +22,4 @@ struct OperationalController::DisarmedState : OperationalController::State {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__DISARMED_STATE_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__DISARMED_STATE_HPP_

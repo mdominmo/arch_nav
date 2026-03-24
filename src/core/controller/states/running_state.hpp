@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__RUNNING_STATE_HPP_
-#define NAVIGATION__CORE__CONTROLLER__RUNNING_STATE_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__RUNNING_STATE_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__RUNNING_STATE_HPP_
 
 #include <memory>
 
@@ -11,7 +11,6 @@ namespace arch_nav::controller {
 struct OperationalController::RunningState : OperationalController::State {
   explicit RunningState(std::unique_ptr<NavigationTask> task);
 
-  void on_enter(OperationalController& ctx) override;
   void on_vehicle_status_update(
       OperationalController& ctx,
       const vehicle::VehicleStatus& status) override;
@@ -23,4 +22,4 @@ struct OperationalController::RunningState : OperationalController::State {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__RUNNING_STATE_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__RUNNING_STATE_HPP_

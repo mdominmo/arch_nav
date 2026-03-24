@@ -2,14 +2,15 @@
 
 namespace arch_nav::controller {
 
-TakeoffTask::TakeoffTask(double height) : height_(height) {}
+TakeoffTask::TakeoffTask(double height, constants::ReferenceFrame frame)
+    : height_(height), frame_(frame) {}
 
-void TakeoffTask::start(
+constants::CommandResponse TakeoffTask::start(
     context::VehicleContext&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
-  dispatcher.execute_takeoff(height_, std::move(on_complete));
+  return dispatcher.execute_takeoff(height_, frame_, std::move(on_complete));
 }
 
 void TakeoffTask::abort() {

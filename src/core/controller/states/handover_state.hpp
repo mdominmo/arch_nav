@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__HANDOVER_STATE_HPP_
-#define NAVIGATION__CORE__CONTROLLER__HANDOVER_STATE_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__HANDOVER_STATE_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__HANDOVER_STATE_HPP_
 
 #include "core/controller/operational_controller.hpp"
 
@@ -13,4 +13,4 @@ struct OperationalController::HandoverState : OperationalController::State {
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__HANDOVER_STATE_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__HANDOVER_STATE_HPP_

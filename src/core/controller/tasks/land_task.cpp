@@ -2,12 +2,12 @@
 
 namespace arch_nav::controller {
 
-void LandTask::start(
+constants::CommandResponse LandTask::start(
     context::VehicleContext&,
     dispatchers::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
-  dispatcher.execute_land(std::move(on_complete));
+  return dispatcher.execute_land(std::move(on_complete));
 }
 
 void LandTask::abort() {

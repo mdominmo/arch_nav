@@ -1,5 +1,5 @@
-#ifndef NAVIGATION__CORE__MODEL__REPORT__WAYPOINT_REPORT_HPP_
-#define NAVIGATION__CORE__MODEL__REPORT__WAYPOINT_REPORT_HPP_
+#ifndef ARCH_NAV__CORE__MODEL__REPORT__WAYPOINT_REPORT_HPP_
+#define ARCH_NAV__CORE__MODEL__REPORT__WAYPOINT_REPORT_HPP_
 
 #include <cstddef>
 
@@ -24,4 +24,4 @@ class WaypointReport : public OperationReport {
 
 }  // namespace arch_nav::report
 
-#endif  // NAVIGATION__CORE__MODEL__REPORT__WAYPOINT_REPORT_HPP_
+#endif  // ARCH_NAV__CORE__MODEL__REPORT__WAYPOINT_REPORT_HPP_

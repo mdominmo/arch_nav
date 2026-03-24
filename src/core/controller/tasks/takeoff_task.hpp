@@ -1,15 +1,16 @@
-#ifndef NAVIGATION__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
-#define NAVIGATION__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
+#ifndef ARCH_NAV__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
+#define ARCH_NAV__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
 
 #include "core/controller/navigation_task.hpp"
+#include "core/constants/reference_frame.hpp"
 
 namespace arch_nav::controller {
 
 class TakeoffTask : public NavigationTask {
  public:
-  explicit TakeoffTask(double height);
+  TakeoffTask(double height, constants::ReferenceFrame frame);
 
-  void start(
+  constants::CommandResponse start(
       context::VehicleContext& context,
       dispatchers::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
@@ -20,9 +21,10 @@ class TakeoffTask : public NavigationTask {
 
  private:
   double height_;
+  constants::ReferenceFrame frame_;
   dispatchers::ICommandDispatcher* dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller
 
-#endif  // NAVIGATION__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
+#endif  // ARCH_NAV__CORE__CONTROLLER__TAKEOFF_TASK_HPP_
