@@ -1,7 +1,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "core/model/vehicle/global_position.hpp"
+#include "arch_nav/model/vehicle/global_position.hpp"
 
 using arch_nav::vehicle::GlobalPosition;
 

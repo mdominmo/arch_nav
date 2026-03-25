@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "utils/gnss_local_frame.hpp"
+#include "arch_nav/utils/gnss_local_frame.hpp"
 
 using namespace arch_nav::utils::gnss_local_frame;
 

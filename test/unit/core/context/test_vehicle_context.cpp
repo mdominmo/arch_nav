@@ -2,7 +2,7 @@
 #include <limits>
 #include <gtest/gtest.h>
 
-#include "core/context/vehicle_context.hpp"
+#include "arch_nav/context/vehicle_context.hpp"
 
 using arch_nav::constants::ArmState;
 using arch_nav::constants::ControlState;

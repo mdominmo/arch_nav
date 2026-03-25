@@ -1,7 +1,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "core/model/vehicle/kinematics.hpp"
+#include "arch_nav/model/vehicle/kinematics.hpp"
 
 using arch_nav::vehicle::Kinematics;
 

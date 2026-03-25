@@ -1,12 +1,12 @@
-#include "arch_nav.hpp"
+#include "arch_nav/arch_nav.hpp"
 
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
 
 #include "arch_nav_core.hpp"
-#include "platform/driver_plugin_loader.hpp"
-#include "platform/driver_registry.hpp"
+#include "arch_nav/driver/driver_plugin_loader.hpp"
+#include "arch_nav/driver/driver_registry.hpp"
 
 namespace arch_nav {
 namespace {

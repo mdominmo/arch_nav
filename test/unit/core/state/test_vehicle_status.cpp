@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "core/model/vehicle/vehicle_status.hpp"
+#include "arch_nav/model/vehicle/vehicle_status.hpp"
 
 using arch_nav::constants::ArmState;
 using arch_nav::constants::ControlState;

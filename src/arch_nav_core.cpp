@@ -5,7 +5,7 @@ namespace arch_nav {
 ArchNavCore::ArchNavCore(dispatchers::ICommandDispatcher& dispatcher)
     : context_()
     , controller_(context_, dispatcher)
-    , api_(controller_) {}
+    , api_(controller_, context_) {}
 
 ArchNavApi& ArchNavCore::api() {
   return api_;

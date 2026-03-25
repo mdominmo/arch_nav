@@ -9,22 +9,22 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 add_library(arch_nav SHARED
-  src/core/controller/operational_controller.cpp
-  src/core/controller/states/handover_state.cpp
-  src/core/controller/states/disarmed_state.cpp
-  src/core/controller/states/idle_state.cpp
-  src/core/controller/states/running_state.cpp
-  src/core/controller/tasks/land_task.cpp
-  src/core/controller/tasks/takeoff_task.cpp
-  src/core/controller/tasks/waypoint_task.cpp
-  src/core/controller/tasks/trajectory_execution_task.cpp
-  src/core/context/vehicle_context.cpp
+  src/controller/operational_controller.cpp
+  src/controller/states/handover_state.cpp
+  src/controller/states/disarmed_state.cpp
+  src/controller/states/idle_state.cpp
+  src/controller/states/running_state.cpp
+  src/controller/tasks/land_task.cpp
+  src/controller/tasks/takeoff_task.cpp
+  src/controller/tasks/waypoint_task.cpp
+  src/controller/tasks/trajectory_execution_task.cpp
+  src/context/vehicle_context.cpp
   src/utils/gnss_local_frame.cpp
   src/utils/frame_converter.cpp
   src/arch_nav_api.cpp
   src/arch_nav_core.cpp
-  src/platform/driver_registry.cpp
-  src/platform/driver_plugin_loader.cpp
+  src/driver/driver_registry.cpp
+  src/driver/driver_plugin_loader.cpp
   src/arch_nav.cpp
 )
 
@@ -40,6 +40,8 @@ target_include_directories(arch_nav
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_compile_definitions(arch_nav PRIVATE
