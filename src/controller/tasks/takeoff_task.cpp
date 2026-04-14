@@ -7,7 +7,7 @@ TakeoffTask::TakeoffTask(double height, constants::ReferenceFrame frame)
 
 constants::CommandResponse TakeoffTask::start(
     context::VehicleContext&,
-    dispatchers::ICommandDispatcher& dispatcher,
+    platform::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
   return dispatcher.execute_takeoff(

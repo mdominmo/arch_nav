@@ -2,22 +2,35 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_DIR="${SCRIPT_DIR}/build"
+MANIFEST="${BUILD_DIR}/install_manifest.txt"
 
-echo "Removing build artifacts..."
-rm -rf "${SCRIPT_DIR}/build"
+# Returns true if the path requires elevated permissions to write
+path_needs_sudo() {
+  local target="${1}"
+  while [[ ! -d "${target}" ]]; do
+    target="$(dirname "${target}")"
+  done
+  [[ ! -w "${target}" ]]
+}
 
-echo "Removing system-wide installation..."
-sudo rm -rf /usr/local/lib/libarch_nav.so \
-            /usr/local/lib/arch_nav \
-            /usr/local/lib/cmake/arch_nav \
-            /usr/local/include/arch_nav*.hpp \
-            /usr/local/include/core \
-            /usr/local/include/config \
-            /usr/local/include/dispatchers \
-            /usr/local/include/platform \
-            /usr/local/include/utils \
-            /usr/local/share/arch-nav \
-            /usr/local/share/arch_nav_mavsdk_driver
-sudo ldconfig
+if [[ -f "${MANIFEST}" ]]; then
+  echo "==> Removing installed files"
+  FIRST_INSTALLED="$(head -1 "${MANIFEST}")"
+  if path_needs_sudo "$(dirname "${FIRST_INSTALLED}")"; then
+    sudo xargs -r rm -f < "${MANIFEST}"
+    # Refresh linker cache if files were in a system-wide path
+    if [[ "${FIRST_INSTALLED}" == /usr* || "${FIRST_INSTALLED}" == /lib* ]]; then
+      sudo ldconfig
+    fi
+  else
+    xargs -r rm -f < "${MANIFEST}"
+  fi
+else
+  echo "==> No install manifest found — skipping uninstall"
+fi
 
-echo "Clean complete."
+echo "==> Removing build directory"
+rm -rf "${BUILD_DIR}"
+
+echo "==> Done"

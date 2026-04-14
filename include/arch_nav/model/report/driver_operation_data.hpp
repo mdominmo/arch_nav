@@ -3,9 +3,7 @@
 
 namespace arch_nav::report {
 
-struct DriverOperationData {
-  virtual ~DriverOperationData() = default;
-};
+struct DriverOperationData {};
 
 }  // namespace arch_nav::report
 

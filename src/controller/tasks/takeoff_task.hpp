@@ -13,7 +13,7 @@ class TakeoffTask : public NavigationTask {
 
   constants::CommandResponse start(
       context::VehicleContext& context,
-      dispatchers::ICommandDispatcher& dispatcher,
+      platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
@@ -23,7 +23,7 @@ class TakeoffTask : public NavigationTask {
  private:
   double height_;
   constants::ReferenceFrame frame_;
-  dispatchers::ICommandDispatcher* dispatcher_{nullptr};
+  platform::ICommandDispatcher* dispatcher_{nullptr};
   std::shared_ptr<report::TakeoffReport> report_;
 };
 

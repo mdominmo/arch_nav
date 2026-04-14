@@ -7,7 +7,7 @@ namespace arch_nav::controller {
 
 class DisarmCommand : public VehicleCommand {
  public:
-  void execute(dispatchers::ICommandDispatcher& dispatcher) override {
+  void execute(platform::ICommandDispatcher& dispatcher) override {
     dispatcher.execute_disarm();
   }
 };

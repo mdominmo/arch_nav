@@ -19,7 +19,7 @@ class WaypointTask : public NavigationTask {
 
   constants::CommandResponse start(
       context::VehicleContext& context,
-      dispatchers::ICommandDispatcher& dispatcher,
+      platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
@@ -30,7 +30,7 @@ class WaypointTask : public NavigationTask {
   std::vector<vehicle::Waypoint>          waypoints_;
   constants::ReferenceFrame               frame_;
   std::shared_ptr<report::WaypointReport> report_;
-  dispatchers::ICommandDispatcher*        dispatcher_{nullptr};
+  platform::ICommandDispatcher*        dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller

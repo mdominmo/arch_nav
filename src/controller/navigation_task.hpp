@@ -15,7 +15,7 @@ class NavigationTask {
  public:
   virtual constants::CommandResponse start(
       context::VehicleContext& context,
-      dispatchers::ICommandDispatcher& dispatcher,
+      platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) = 0;
 
   virtual void abort() = 0;

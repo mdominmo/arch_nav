@@ -9,6 +9,10 @@
 #include "arch_nav/driver/driver_registry.hpp"
 
 namespace arch_nav {
+
+// TODO: make configurable (env var or config file) instead of a hardcoded default
+static constexpr std::chrono::milliseconds kDefaultContextUpdatePeriod{20};
+
 namespace {
 
 std::string resolve_driver_name(const platform::DriverRegistry& registry) {
@@ -56,7 +60,7 @@ struct ArchNav::Impl {
 ArchNav::ArchNav(std::unique_ptr<Impl> impl)
     : impl_(std::move(impl)) {}
 
-std::unique_ptr<ArchNav> ArchNav::create() {
+std::unique_ptr<ArchNav> ArchNav::create(std::chrono::milliseconds context_update_period) {
   auto impl = std::make_unique<Impl>();
   impl->plugin_loader.load_all();
 
@@ -69,7 +73,7 @@ std::unique_ptr<ArchNav> ArchNav::create() {
   impl->core = std::make_unique<ArchNavCore>(
       impl->driver->dispatcher());
 
-  impl->driver->start(impl->core->context());
+  impl->driver->start(impl->core->context(), context_update_period);
 
   return std::unique_ptr<ArchNav>(new ArchNav(std::move(impl)));
 }

@@ -17,7 +17,7 @@ namespace arch_nav::controller {
 
 OperationalController::OperationalController(
     context::VehicleContext& vehicle_context,
-    dispatchers::ICommandDispatcher& dispatcher)
+    platform::ICommandDispatcher& dispatcher)
     : vehicle_context_(vehicle_context),
       dispatcher_(dispatcher),
       current_state_(nullptr),

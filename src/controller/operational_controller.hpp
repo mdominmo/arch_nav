@@ -23,7 +23,7 @@ class OperationalController {
  public:
   explicit OperationalController(
       context::VehicleContext& vehicle_context,
-      dispatchers::ICommandDispatcher& dispatcher);
+      platform::ICommandDispatcher& dispatcher);
 
   ~OperationalController();
 
@@ -68,7 +68,7 @@ class OperationalController {
 
   mutable std::mutex                         mutex_;
   context::VehicleContext&                   vehicle_context_;
-  dispatchers::ICommandDispatcher&           dispatcher_;
+  platform::ICommandDispatcher&           dispatcher_;
   std::unique_ptr<State>                     current_state_;
   constants::OperationStatus                 current_status_;
   std::shared_ptr<report::OperationReport>   last_report_;

@@ -1,6 +1,8 @@
 #ifndef ARCH_NAV_DRIVER_I_PLATFORM_DRIVER_HPP_
 #define ARCH_NAV_DRIVER_I_PLATFORM_DRIVER_HPP_
 
+#include <chrono>
+
 #include "arch_nav/driver/i_command_dispatcher.hpp"
 
 namespace arch_nav::context {
@@ -13,9 +15,10 @@ class IPlatformDriver {
  public:
   virtual ~IPlatformDriver() = default;
 
-  virtual dispatchers::ICommandDispatcher& dispatcher() = 0;
+  virtual ICommandDispatcher& dispatcher() = 0;
 
-  virtual void start(context::VehicleContext& context) = 0;
+  virtual void start(context::VehicleContext& context,
+                     std::chrono::milliseconds update_period) = 0;
 
   virtual void stop() = 0;
 };

@@ -18,7 +18,7 @@ class TrajectoryExecutionTask : public NavigationTask {
 
   constants::CommandResponse start(
       context::VehicleContext& context,
-      dispatchers::ICommandDispatcher& dispatcher,
+      platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
@@ -29,7 +29,7 @@ class TrajectoryExecutionTask : public NavigationTask {
   std::vector<vehicle::TrajectoryPoint>     trajectory_;
   constants::ReferenceFrame                 frame_;
   std::shared_ptr<report::OperationReport>  report_;
-  dispatchers::ICommandDispatcher*          dispatcher_{nullptr};
+  platform::ICommandDispatcher*          dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller

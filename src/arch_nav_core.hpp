@@ -10,7 +10,7 @@ namespace arch_nav {
 
 class ArchNavCore {
  public:
-  explicit ArchNavCore(dispatchers::ICommandDispatcher& dispatcher);
+  explicit ArchNavCore(platform::ICommandDispatcher& dispatcher);
 
   ArchNavApi& api();
   context::VehicleContext& context();

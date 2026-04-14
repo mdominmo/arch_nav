@@ -9,7 +9,7 @@ WaypointTask::WaypointTask(
 
 constants::CommandResponse WaypointTask::start(
     context::VehicleContext&,
-    dispatchers::ICommandDispatcher& dispatcher,
+    platform::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
   return dispatcher.execute_waypoint_following(

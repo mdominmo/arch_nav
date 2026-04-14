@@ -7,8 +7,8 @@ namespace arch_nav::controller {
 
 class VehicleCommand {
  public:
-  virtual void execute(dispatchers::ICommandDispatcher& dispatcher) = 0;
-  virtual void cancel(dispatchers::ICommandDispatcher& dispatcher) { dispatcher.stop(); }
+  virtual void execute(platform::ICommandDispatcher& dispatcher) = 0;
+  virtual void cancel(platform::ICommandDispatcher& dispatcher) { dispatcher.stop(); }
   virtual ~VehicleCommand() = default;
 };
 

@@ -11,7 +11,7 @@
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
 
-namespace arch_nav::dispatchers {
+namespace arch_nav::platform {
 
 class ICommandDispatcher {
  public:
@@ -55,6 +55,6 @@ class ICommandDispatcher {
   virtual ~ICommandDispatcher() = default;
 };
 
-}  // namespace arch_nav::dispatchers
+}  // namespace arch_nav::platform
 
 #endif  // ARCH_NAV_DRIVER_I_COMMAND_DISPATCHER_HPP_

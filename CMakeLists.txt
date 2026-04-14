@@ -65,6 +65,14 @@ if(BUILD_TESTING)
   add_arch_nav_test(test_vehicle_context test/unit/core/context/test_vehicle_context.cpp)
 
   add_arch_nav_test(test_gnss_local_frame test/unit/utils/test_gnss_local_frame.cpp)
+
+  add_executable(test_operational_controller
+    test/unit/controller/test_operational_controller.cpp)
+  target_link_libraries(test_operational_controller PRIVATE arch_nav GTest::gtest_main)
+  target_include_directories(test_operational_controller PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  add_test(NAME test_operational_controller COMMAND test_operational_controller)
 endif()
 
 install(DIRECTORY include/

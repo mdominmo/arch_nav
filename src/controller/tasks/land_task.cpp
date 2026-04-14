@@ -4,7 +4,7 @@ namespace arch_nav::controller {
 
 constants::CommandResponse LandTask::start(
     context::VehicleContext&,
-    dispatchers::ICommandDispatcher& dispatcher,
+    platform::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
   return dispatcher.execute_land(std::move(on_complete));

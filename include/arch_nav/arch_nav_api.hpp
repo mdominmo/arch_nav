@@ -11,6 +11,7 @@
 #include "arch_nav/model/report/operation_report.hpp"
 #include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/vehicle/kinematics.hpp"
+#include "arch_nav/model/vehicle/vehicle_status.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
 
@@ -35,7 +36,7 @@ class ArchNavApi {
   constants::CommandResponse land();
   constants::CommandResponse waypoint_following(
       std::vector<vehicle::Waypoint> waypoints,
-      constants::ReferenceFrame frame);
+      constants::ReferenceFrame frame = constants::ReferenceFrame::GLOBAL_WGS84);
   constants::CommandResponse trajectory_execution(
       std::vector<vehicle::TrajectoryPoint> trajectory,
       constants::ReferenceFrame frame = constants::ReferenceFrame::LOCAL_NED);
@@ -49,6 +50,7 @@ class ArchNavApi {
 
   vehicle::GlobalPosition global_position() const;
   vehicle::Kinematics     kinematics() const;
+  vehicle::VehicleStatus  vehicle_status() const;
 
   void on_operation_complete(std::function<void(const report::OperationReport&)> callback);
   void on_operation_progress(std::function<void(const report::OperationReport&)> callback);

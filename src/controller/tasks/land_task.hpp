@@ -9,7 +9,7 @@ class LandTask : public NavigationTask {
  public:
   constants::CommandResponse start(
       context::VehicleContext& context,
-      dispatchers::ICommandDispatcher& dispatcher,
+      platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
@@ -17,7 +17,7 @@ class LandTask : public NavigationTask {
   std::shared_ptr<report::OperationReport> make_report() override;
 
  private:
-  dispatchers::ICommandDispatcher* dispatcher_{nullptr};
+  platform::ICommandDispatcher* dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller

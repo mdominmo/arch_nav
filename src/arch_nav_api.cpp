@@ -71,6 +71,10 @@ vehicle::Kinematics ArchNavApi::kinematics() const {
   return impl_->vehicle_context.get_kinematic();
 }
 
+vehicle::VehicleStatus ArchNavApi::vehicle_status() const {
+  return impl_->vehicle_context.get_vehicle_status();
+}
+
 void ArchNavApi::on_operation_complete(
     std::function<void(const report::OperationReport&)> callback) {
   impl_->on_complete_callback = std::move(callback);
