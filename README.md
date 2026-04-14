@@ -1,12 +1,12 @@
 # arch-nav
 
-![License](https://img.shields.io/github/license/mdominmo/arch-nav) ![Version](https://img.shields.io/github/v/release/mdominmo/arch-nav)
+![License](https://img.shields.io/github/license/mdominmo/arch-nav) ![Version](https://img.shields.io/github/v/release/mdominmo/arch_nav)
 
 Platform-agnostic UAV navigation kernel. Handles operation control and vehicle state management with zero dependency on any specific autopilot, middleware, or framework.
 
 ## How to get started
 
-This repository contains the core ArchNav navigation kernel. For a guided setup, installation instructions, and first-run examples, see the documentation: https://mdominmo.github.io/arch-nav/
+This repository contains the core ArchNav navigation kernel. For a guided setup, installation instructions, and first-run examples, see the documentation: https://mdominmo.github.io/arch_nav/
 
 ## Build and install
 
