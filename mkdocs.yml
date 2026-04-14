@@ -1,0 +1,30 @@
+site_name: arch_nav
+site_description: Platform-agnostic UAV navigation kernel
+site_url: https://github.com/mdominmo/arch-nav
+repo_url: https://github.com/mdominmo/arch-nav
+repo_name: mdominmo/arch-nav
+
+theme:
+  name: mkdocs
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - First Run: getting-started/first-run.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Driver Lifecycle: architecture/driver-lifecycle.md
+  - API Reference:
+      - ArchNav: api/arch-nav.md
+      - ArchNavApi: api/arch-nav-api.md
+      - Driver Interfaces: api/driver-interfaces.md
+  - Development:
+      - Build & Test: development/build-and-test.md
+      - Writing Drivers: development/writing-drivers.md
+      - Concurrency Notes: development/concurrency-notes.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true

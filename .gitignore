@@ -3,3 +3,4 @@
 /install
 /drivers/*
 !/drivers/.gitkeep
+/site/
