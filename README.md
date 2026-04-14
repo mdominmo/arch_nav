@@ -1,4 +1,5 @@
 # arch-nav
+![ArchNav preview](docs/img/arch_nav_logo.png)
 
 ![License](https://img.shields.io/github/license/mdominmo/arch-nav) ![Version](https://img.shields.io/github/v/release/mdominmo/arch_nav)
 
