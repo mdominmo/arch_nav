@@ -13,6 +13,8 @@ print_usage() {
   echo "  --prefix <path>   Installation prefix (default: /usr/local)"
   echo "  --tests           Build and run tests"
   echo "  -h, --help        Show this help"
+  echo ""
+  echo "Note: If --prefix is not specified, /usr/local is used and installation will typically require sudo."
 }
 
 while [[ $# -gt 0 ]]; do
@@ -23,6 +25,10 @@ while [[ $# -gt 0 ]]; do
     *) echo "Error: unknown option '$1'"; print_usage; exit 1 ;;
   esac
 done
+
+if [[ "${INSTALL_PREFIX}" == "/usr/local" ]]; then
+  echo "==> Note: no --prefix specified; using /usr/local usually requires sudo for installation."
+fi
 
 # Returns true if the install prefix requires elevated permissions
 install_needs_sudo() {

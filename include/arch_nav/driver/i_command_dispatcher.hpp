@@ -16,29 +16,29 @@ namespace arch_nav::platform {
 class ICommandDispatcher {
  public:
   virtual constants::CommandResponse execute_takeoff(
-      double height, constants::ReferenceFrame frame,
-      std::function<void()> on_complete,
-      report::TakeoffDriverOperationData& driver_data) {
+      double, constants::ReferenceFrame,
+      std::function<void()>,
+      report::TakeoffDriverOperationData&) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
   virtual constants::CommandResponse execute_land(
-      std::function<void()> on_complete) {
+      std::function<void()>) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
   virtual constants::CommandResponse execute_waypoint_following(
-      std::vector<vehicle::Waypoint> waypoints,
-      constants::ReferenceFrame frame,
-      std::function<void()> on_complete,
-      report::WaypointDriverOperationData& driver_data) {
+      std::vector<vehicle::Waypoint>,
+      constants::ReferenceFrame,
+      std::function<void()>,
+      report::WaypointDriverOperationData&) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
   virtual constants::CommandResponse execute_trajectory(
-      std::vector<vehicle::TrajectoryPoint> trajectory,
-      constants::ReferenceFrame frame,
-      std::function<void()> on_complete) {
+      std::vector<vehicle::TrajectoryPoint>,
+      constants::ReferenceFrame,
+      std::function<void()>) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
