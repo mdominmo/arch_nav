@@ -77,12 +77,14 @@ vehicle::VehicleStatus ArchNavApi::vehicle_status() const {
 
 void ArchNavApi::on_operation_complete(
     std::function<void(const report::OperationReport&)> callback) {
-  impl_->on_complete_callback = std::move(callback);
+  impl_->on_complete_callback = callback;
+  impl_->controller.set_on_complete_listener(std::move(callback));
 }
 
 void ArchNavApi::on_operation_progress(
     std::function<void(const report::OperationReport&)> callback) {
-  impl_->on_progress_callback = std::move(callback);
+  impl_->on_progress_callback = callback;
+  impl_->controller.set_on_progress_listener(std::move(callback));
 }
 
 }  // namespace arch_nav

@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
+#include <atomic>
+#include <chrono>
 #include <functional>
 #include <memory>
+#include <thread>
 
 #include "arch_nav/constants/command_response.hpp"
 #include "arch_nav/constants/operation_status.hpp"
@@ -250,4 +253,115 @@ TEST_F(OperationalControllerTest, Running_ToDisarmedOnDisarm) {
 
   EXPECT_EQ(ctrl_.operation_status(), OperationStatus::DISARMED);
   EXPECT_EQ(ctrl_.last_operation_report()->status(), ReportStatus::ABORTED);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Callbacks
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, Callback_OnCompleteCalledWithCompletedOnNormalFinish) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+
+  bool called = false;
+  ReportStatus received = ReportStatus::IN_PROGRESS;
+  ctrl_.set_on_complete_listener([&](const OperationReport& r) {
+    called = true;
+    received = r.status();
+  });
+
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  dispatcher_.complete();
+
+  EXPECT_TRUE(called);
+  EXPECT_EQ(received, ReportStatus::COMPLETED);
+}
+
+TEST_F(OperationalControllerTest, Callback_OnCompleteCalledWithAbortedOnControlLost) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+
+  bool called = false;
+  ReportStatus received = ReportStatus::IN_PROGRESS;
+  ctrl_.set_on_complete_listener([&](const OperationReport& r) {
+    called = true;
+    received = r.status();
+  });
+
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  context_.update(external_control());
+
+  EXPECT_TRUE(called);
+  EXPECT_EQ(received, ReportStatus::ABORTED);
+}
+
+TEST_F(OperationalControllerTest, Callback_OnCompleteCalledWithAbortedOnDisarm) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+
+  bool called = false;
+  ReportStatus received = ReportStatus::IN_PROGRESS;
+  ctrl_.set_on_complete_listener([&](const OperationReport& r) {
+    called = true;
+    received = r.status();
+  });
+
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  context_.update(kernel_disarmed());
+
+  EXPECT_TRUE(called);
+  EXPECT_EQ(received, ReportStatus::ABORTED);
+}
+
+TEST_F(OperationalControllerTest, Callback_OnCompleteCalledWithAbortedOnStop) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+
+  bool called = false;
+  ReportStatus received = ReportStatus::IN_PROGRESS;
+  ctrl_.set_on_complete_listener([&](const OperationReport& r) {
+    called = true;
+    received = r.status();
+  });
+
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  ctrl_.stop();
+
+  EXPECT_TRUE(called);
+  EXPECT_EQ(received, ReportStatus::ABORTED);
+}
+
+TEST_F(OperationalControllerTest, Callback_OnProgressCalledDuringOperation) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+
+  std::atomic<int> call_count{0};
+  ctrl_.set_on_progress_listener([&](const OperationReport&) {
+    call_count++;
+  });
+
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  std::this_thread::sleep_for(std::chrono::milliseconds(350));
+  ctrl_.stop();
+
+  EXPECT_GE(call_count.load(), 2);
+}
+
+TEST_F(OperationalControllerTest, Callback_OnProgressStopsAfterOperationComplete) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+
+  std::atomic<int> call_count{0};
+  ctrl_.set_on_progress_listener([&](const OperationReport&) {
+    call_count++;
+  });
+
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  dispatcher_.complete();
+
+  const int count_at_complete = call_count.load();
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+  EXPECT_EQ(call_count.load(), count_at_complete);
 }

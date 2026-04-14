@@ -46,6 +46,7 @@ constants::CommandResponse OperationalController::IdleState::try_execute(
   ctx.last_report_ = report;
   ctx.current_state_ = std::make_unique<RunningState>(std::move(task));
   ctx.current_status_ = constants::OperationStatus::RUNNING;
+  ctx.start_progress_thread();
   return constants::CommandResponse::ACCEPTED;
 }
 

@@ -1,5 +1,6 @@
 #include "controller/operational_controller.hpp"
 
+#include <chrono>
 #include <memory>
 
 #include "commands/arm_command.hpp"
@@ -31,7 +32,9 @@ OperationalController::OperationalController(
       });
 }
 
-OperationalController::~OperationalController() = default;
+OperationalController::~OperationalController() {
+  stop_progress_thread();
+}
 
 constants::CommandResponse OperationalController::takeoff(
     double height, constants::ReferenceFrame frame) {
@@ -95,12 +98,53 @@ void OperationalController::on_vehicle_status_update(
   current_state_->on_vehicle_status_update(*this, status);
 }
 
-void OperationalController::on_operation_complete() {
+void OperationalController::set_on_complete_listener(
+    std::function<void(const report::OperationReport&)> cb) {
   std::lock_guard<std::mutex> lock(mutex_);
-  if (last_report_) last_report_->complete();
-  change_state(
-      std::make_unique<IdleState>(),
-      constants::OperationStatus::IDLE);
+  on_complete_listener_ = std::move(cb);
+}
+
+void OperationalController::set_on_progress_listener(
+    std::function<void(const report::OperationReport&)> cb) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  on_progress_listener_ = std::move(cb);
+}
+
+void OperationalController::start_progress_thread() {
+  auto listener = on_progress_listener_;
+  auto report   = last_report_;
+
+  progress_stop_ = false;
+  progress_thread_ = std::thread([this, listener, report] {
+    while (!progress_stop_) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      if (progress_stop_) break;
+      if (listener && report) listener(*report);
+    }
+  });
+}
+
+void OperationalController::stop_progress_thread() {
+  progress_stop_ = true;
+  if (progress_thread_.joinable()) progress_thread_.join();
+}
+
+void OperationalController::on_operation_complete() {
+  stop_progress_thread();
+
+  std::shared_ptr<report::OperationReport> report;
+  std::function<void(const report::OperationReport&)> listener;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (last_report_) last_report_->complete();
+    report   = last_report_;
+    listener = on_complete_listener_;
+    change_state(
+        std::make_unique<IdleState>(),
+        constants::OperationStatus::IDLE);
+  }
+
+  if (listener && report) listener(*report);
 }
 
 void OperationalController::change_state(

@@ -1,8 +1,11 @@
 #ifndef ARCH_NAV_CONTROLLER_OPERATIONAL_CONTROLLER_HPP_
 #define ARCH_NAV_CONTROLLER_OPERATIONAL_CONTROLLER_HPP_
 
+#include <atomic>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include "arch_nav/constants/command_response.hpp"
@@ -42,6 +45,9 @@ class OperationalController {
   constants::OperationStatus       operation_status() const;
   const report::OperationReport*   last_operation_report() const;
 
+  void set_on_complete_listener(std::function<void(const report::OperationReport&)>);
+  void set_on_progress_listener(std::function<void(const report::OperationReport&)>);
+
  private:
   struct State {
     virtual void on_enter(OperationalController&) {}
@@ -66,12 +72,20 @@ class OperationalController {
   void on_operation_complete();
   void change_state(std::unique_ptr<State> new_state, constants::OperationStatus status);
 
+  void start_progress_thread();
+  void stop_progress_thread();
+
   mutable std::mutex                         mutex_;
   context::VehicleContext&                   vehicle_context_;
-  platform::ICommandDispatcher&           dispatcher_;
+  platform::ICommandDispatcher&              dispatcher_;
   std::unique_ptr<State>                     current_state_;
   constants::OperationStatus                 current_status_;
   std::shared_ptr<report::OperationReport>   last_report_;
+
+  std::function<void(const report::OperationReport&)> on_complete_listener_;
+  std::function<void(const report::OperationReport&)> on_progress_listener_;
+  std::thread                                progress_thread_;
+  std::atomic<bool>                          progress_stop_{false};
 };
 
 }  // namespace arch_nav::controller
