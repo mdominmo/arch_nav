@@ -27,6 +27,12 @@ class ICommandDispatcher {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
+  virtual constants::CommandResponse execute_change_yaw(
+      double, constants::ReferenceFrame,
+      std::function<void()>) {
+    return constants::CommandResponse::NOT_SUPPORTED;
+  }
+
   virtual constants::CommandResponse execute_waypoint_following(
       std::vector<vehicle::Waypoint>,
       constants::ReferenceFrame,

@@ -15,6 +15,7 @@ add_library(arch_nav SHARED
   src/controller/states/idle_state.cpp
   src/controller/states/running_state.cpp
   src/controller/tasks/land_task.cpp
+  src/controller/tasks/change_yaw_task.cpp
   src/controller/tasks/takeoff_task.cpp
   src/controller/tasks/waypoint_task.cpp
   src/controller/tasks/trajectory_execution_task.cpp
