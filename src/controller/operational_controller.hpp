@@ -42,6 +42,10 @@ class OperationalController {
   void stop();
   constants::CommandResponse arm();
   constants::CommandResponse disarm();
+  constants::CommandResponse set_roi(
+      vehicle::GlobalPosition position,
+      constants::ReferenceFrame frame);
+  constants::CommandResponse clear_roi();
 
   constants::OperationStatus       operation_status() const;
   const report::OperationReport*   last_operation_report() const;
@@ -58,8 +62,10 @@ class OperationalController {
         OperationalController&, std::unique_ptr<NavigationTask>) {
       return constants::CommandResponse::DENIED;
     }
-    virtual void try_command(
-        OperationalController&, std::unique_ptr<VehicleCommand>) {}
+    virtual constants::CommandResponse try_command(
+        OperationalController&, std::unique_ptr<VehicleCommand>) {
+      return constants::CommandResponse::DENIED;
+    }
     virtual void try_stop(OperationalController&) {}
     virtual ~State() = default;
   };

@@ -12,7 +12,7 @@ struct OperationalController::IdleState : OperationalController::State {
   constants::CommandResponse try_execute(
       OperationalController& ctx,
       std::unique_ptr<NavigationTask> task) override;
-  void try_command(
+  constants::CommandResponse try_command(
       OperationalController& ctx,
       std::unique_ptr<VehicleCommand> cmd) override;
 };

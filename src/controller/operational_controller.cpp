@@ -4,7 +4,9 @@
 #include <memory>
 
 #include "commands/arm_command.hpp"
+#include "commands/clear_roi_command.hpp"
 #include "commands/disarm_command.hpp"
+#include "commands/set_roi_command.hpp"
 #include "states/disarmed_state.hpp"
 #include "states/handover_state.hpp"
 #include "states/idle_state.hpp"
@@ -80,14 +82,24 @@ void OperationalController::stop() {
 
 constants::CommandResponse OperationalController::arm() {
   std::lock_guard<std::mutex> lock(mutex_);
-  current_state_->try_command(*this, std::make_unique<ArmCommand>());
-  return constants::CommandResponse::ACCEPTED;
+  return current_state_->try_command(*this, std::make_unique<ArmCommand>());
 }
 
 constants::CommandResponse OperationalController::disarm() {
   std::lock_guard<std::mutex> lock(mutex_);
-  current_state_->try_command(*this, std::make_unique<DisarmCommand>());
-  return constants::CommandResponse::ACCEPTED;
+  return current_state_->try_command(*this, std::make_unique<DisarmCommand>());
+}
+
+constants::CommandResponse OperationalController::set_roi(
+    vehicle::GlobalPosition position, constants::ReferenceFrame frame) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_command(
+      *this, std::make_unique<SetRoiCommand>(std::move(position), frame));
+}
+
+constants::CommandResponse OperationalController::clear_roi() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_command(*this, std::make_unique<ClearRoiCommand>());
 }
 
 constants::OperationStatus OperationalController::operation_status() const {

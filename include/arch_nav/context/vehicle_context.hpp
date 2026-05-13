@@ -2,6 +2,7 @@
 #define ARCH_NAV_CONTEXT_VEHICLE_CONTEXT_HPP_
 
 #include <functional>
+#include <optional>
 #include <shared_mutex>
 
 #include "arch_nav/model/vehicle/kinematics.hpp"
@@ -20,22 +21,25 @@ class VehicleContext {
   VehicleContext();
 
   GlobalPosition get_global_position() const;
-
   Kinematics get_kinematic() const;
-
   VehicleStatus get_vehicle_status() const;
+  std::optional<GlobalPosition> get_roi() const;
 
   void update(const GlobalPosition& state);
   void update(const Kinematics& state);
   void update(const VehicleStatus& state);
+  void update_roi(const GlobalPosition& roi);
+  void clear_roi();
 
   void subscribe_vehicle_status(std::function<void(const VehicleStatus&)> callback);
 
  private:
   mutable std::shared_mutex global_position_mutex_;
   mutable std::shared_mutex kinematic_mutex_;
+  mutable std::shared_mutex roi_mutex_;
   GlobalPosition global_position_;
   Kinematics kinematic_;
+  std::optional<GlobalPosition> roi_;
   vehicle::BehaviorSubject<VehicleStatus> vehicle_status_;
 };
 

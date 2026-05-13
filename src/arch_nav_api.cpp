@@ -60,6 +60,19 @@ constants::CommandResponse ArchNavApi::disarm() {
   return impl_->controller.disarm();
 }
 
+constants::CommandResponse ArchNavApi::set_roi(
+    vehicle::GlobalPosition position, constants::ReferenceFrame frame) {
+  return impl_->controller.set_roi(std::move(position), frame);
+}
+
+constants::CommandResponse ArchNavApi::clear_roi() {
+  return impl_->controller.clear_roi();
+}
+
+std::optional<vehicle::GlobalPosition> ArchNavApi::get_roi() const {
+  return impl_->vehicle_context.get_roi();
+}
+
 constants::OperationStatus ArchNavApi::operation_status() const {
   return impl_->controller.operation_status();
 }

@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "arch_nav/constants/command_response.hpp"
@@ -47,6 +48,10 @@ class ArchNavApi {
 
   constants::CommandResponse arm();
   constants::CommandResponse disarm();
+  constants::CommandResponse set_roi(
+      vehicle::GlobalPosition position,
+      constants::ReferenceFrame frame = constants::ReferenceFrame::GLOBAL_WGS84);
+  constants::CommandResponse clear_roi();
 
   constants::OperationStatus       operation_status() const;
   const report::OperationReport*   last_operation_report() const;
@@ -54,6 +59,7 @@ class ArchNavApi {
   vehicle::GlobalPosition global_position() const;
   vehicle::Kinematics     kinematics() const;
   vehicle::VehicleStatus  vehicle_status() const;
+  std::optional<vehicle::GlobalPosition> get_roi() const;
 
   void on_operation_complete(std::function<void(const report::OperationReport&)> callback);
   void on_operation_progress(std::function<void(const report::OperationReport&)> callback);
