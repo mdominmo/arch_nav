@@ -34,6 +34,9 @@ class ArchNavApi {
       double height,
       constants::ReferenceFrame frame = constants::ReferenceFrame::LOCAL_NED);
   constants::CommandResponse land();
+  constants::CommandResponse change_yaw(
+      double new_yaw,
+      constants::ReferenceFrame frame = constants::ReferenceFrame::LOCAL_NED);
   constants::CommandResponse waypoint_following(
       std::vector<vehicle::Waypoint> waypoints,
       constants::ReferenceFrame frame = constants::ReferenceFrame::GLOBAL_WGS84);

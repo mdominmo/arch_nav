@@ -38,6 +38,7 @@ class OperationalController {
       constants::ReferenceFrame frame);
   constants::CommandResponse takeoff(double height, constants::ReferenceFrame frame);
   constants::CommandResponse land();
+  constants::CommandResponse change_yaw(double new_yaw, constants::ReferenceFrame frame);
   void stop();
   constants::CommandResponse arm();
   constants::CommandResponse disarm();

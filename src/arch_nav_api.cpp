@@ -31,6 +31,11 @@ constants::CommandResponse ArchNavApi::land() {
   return impl_->controller.land();
 }
 
+constants::CommandResponse ArchNavApi::change_yaw(
+    double new_yaw, constants::ReferenceFrame frame) {
+  return impl_->controller.change_yaw(new_yaw, frame);
+}
+
 constants::CommandResponse ArchNavApi::waypoint_following(
     std::vector<vehicle::Waypoint> waypoints,
     constants::ReferenceFrame frame) {

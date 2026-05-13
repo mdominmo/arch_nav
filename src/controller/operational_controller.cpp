@@ -10,6 +10,7 @@
 #include "states/idle_state.hpp"
 #include "states/running_state.hpp"
 #include "tasks/land_task.hpp"
+#include "tasks/change_yaw_task.hpp"
 #include "tasks/takeoff_task.hpp"
 #include "tasks/waypoint_task.hpp"
 #include "tasks/trajectory_execution_task.hpp"
@@ -47,6 +48,13 @@ constants::CommandResponse OperationalController::land() {
   std::lock_guard<std::mutex> lock(mutex_);
   return current_state_->try_execute(
       *this, std::make_unique<LandTask>());
+}
+
+constants::CommandResponse OperationalController::change_yaw(
+  double new_yaw, constants::ReferenceFrame frame) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return current_state_->try_execute(
+      *this, std::make_unique<ChangeYawTask>(new_yaw, frame));
 }
 
 constants::CommandResponse OperationalController::waypoint_following(

@@ -33,6 +33,7 @@ using arch_nav::vehicle::Waypoint;
 struct MockDispatcher : public ICommandDispatcher {
   bool accept_takeoff  = false;
   bool accept_land     = false;
+  bool accept_change_yaw = false;
   std::function<void()> stored_complete;
 
   CommandResponse execute_arm()    override { return CommandResponse::ACCEPTED; }
@@ -49,6 +50,14 @@ struct MockDispatcher : public ICommandDispatcher {
 
   CommandResponse execute_land(std::function<void()> on_complete) override {
     if (!accept_land) return CommandResponse::NOT_SUPPORTED;
+    stored_complete = std::move(on_complete);
+    return CommandResponse::ACCEPTED;
+  }
+
+  CommandResponse execute_change_yaw(
+      double, ReferenceFrame,
+      std::function<void()> on_complete) override {
+    if (!accept_change_yaw) return CommandResponse::NOT_SUPPORTED;
     stored_complete = std::move(on_complete);
     return CommandResponse::ACCEPTED;
   }
@@ -96,6 +105,7 @@ TEST_F(OperationalControllerTest, Handover_InitialState) {
 TEST_F(OperationalControllerTest, Handover_TasksDenied) {
   EXPECT_EQ(ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84), CommandResponse::DENIED);
   EXPECT_EQ(ctrl_.land(),                                        CommandResponse::DENIED);
+  EXPECT_EQ(ctrl_.change_yaw(1.2, ReferenceFrame::LOCAL_NED),    CommandResponse::DENIED);
   EXPECT_EQ(ctrl_.operation_status(), OperationStatus::HANDOVER);
 }
 
@@ -127,6 +137,7 @@ TEST_F(OperationalControllerTest, Disarmed_TasksDenied) {
   context_.update(kernel_disarmed());
   EXPECT_EQ(ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84), CommandResponse::DENIED);
   EXPECT_EQ(ctrl_.land(),                                        CommandResponse::DENIED);
+  EXPECT_EQ(ctrl_.change_yaw(1.2, ReferenceFrame::LOCAL_NED),    CommandResponse::DENIED);
   EXPECT_EQ(ctrl_.operation_status(), OperationStatus::DISARMED);
 }
 
@@ -176,6 +187,18 @@ TEST_F(OperationalControllerTest, Idle_TaskNotSupportedStaysIdle) {
   EXPECT_EQ(ctrl_.last_operation_report()->status(), ReportStatus::FAILED);
 }
 
+TEST_F(OperationalControllerTest, Idle_ChangeYawNotSupportedStaysIdle) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_change_yaw = false;
+
+  auto resp = ctrl_.change_yaw(0.5, ReferenceFrame::LOCAL_NED);
+
+  EXPECT_EQ(resp, CommandResponse::NOT_SUPPORTED);
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+  ASSERT_NE(ctrl_.last_operation_report(), nullptr);
+  EXPECT_EQ(ctrl_.last_operation_report()->status(), ReportStatus::FAILED);
+}
+
 TEST_F(OperationalControllerTest, Idle_ToRunningOnAcceptedTakeoff) {
   context_.update(kernel_armed());
   dispatcher_.accept_takeoff = true;
@@ -196,6 +219,14 @@ TEST_F(OperationalControllerTest, Idle_ToRunningOnAcceptedLand) {
   EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
 }
 
+TEST_F(OperationalControllerTest, Idle_ToRunningOnAcceptedChangeYaw) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_change_yaw = true;
+
+  EXPECT_EQ(ctrl_.change_yaw(0.7, ReferenceFrame::LOCAL_NED), CommandResponse::ACCEPTED);
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RUNNING state
 // ─────────────────────────────────────────────────────────────────────────────
@@ -213,6 +244,18 @@ TEST_F(OperationalControllerTest, Running_ToIdleOnOperationComplete) {
   context_.update(kernel_armed());
   dispatcher_.accept_takeoff = true;
   ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+  ASSERT_NE(ctrl_.last_operation_report(), nullptr);
+  EXPECT_EQ(ctrl_.last_operation_report()->status(), ReportStatus::COMPLETED);
+}
+
+TEST_F(OperationalControllerTest, Running_ChangeYawToIdleOnOperationComplete) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_change_yaw = true;
+  ctrl_.change_yaw(1.0, ReferenceFrame::LOCAL_NED);
 
   dispatcher_.complete();
 
