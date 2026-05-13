@@ -24,12 +24,18 @@ public:
 
 Supported hooks include:
 
-- `execute_takeoff`
-- `execute_land`
-- `execute_waypoint_following`
-- `execute_trajectory`
-- `execute_arm`
-- `execute_disarm`
-- `stop`
+| Method | Default | Description |
+|--------|---------|-------------|
+| `execute_arm` | `NOT_SUPPORTED` | Arm the vehicle |
+| `execute_disarm` | `NOT_SUPPORTED` | Disarm the vehicle |
+| `execute_takeoff` | `NOT_SUPPORTED` | Takeoff to the given height |
+| `execute_land` | `NOT_SUPPORTED` | Land the vehicle |
+| `execute_waypoint_following` | `NOT_SUPPORTED` | Follow a sequence of global waypoints |
+| `execute_trajectory` | `NOT_SUPPORTED` | Execute a time-parametrised trajectory |
+| `execute_set_roi` | `NOT_SUPPORTED` | Point the vehicle toward a geographic location |
+| `execute_clear_roi` | `NOT_SUPPORTED` | Cancel an active ROI |
+| `stop` | — | Cancel any running asynchronous operation |
 
-Each method can remain `NOT_SUPPORTED` by default if a driver does not implement it.
+All `execute_*` methods return a `CommandResponse` immediately. `ACCEPTED` means the driver has started the operation; `DENIED` means the autopilot rejected it; `NOT_SUPPORTED` means the driver or the requested frame is not handled.
+
+`execute_set_roi` and `execute_clear_roi` are point-in-time commands — the controller calls them and does not wait for a completion callback. If the driver stores ROI state it should write it to `VehicleContext` via `update_roi()` / `clear_roi()`.

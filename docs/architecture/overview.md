@@ -25,3 +25,14 @@ The operation state exposed by the controller/API:
 - `DISARMED`
 - `IDLE`
 - `RUNNING`
+
+### Command vs NavigationTask
+
+The controller distinguishes two kinds of actions:
+
+- **NavigationTask** (`takeoff`, `waypoint_following`, `trajectory_execution`): moves the state to `RUNNING` and fires `on_operation_complete` when finished.
+- **Command** (`arm`, `disarm`, `set_roi`, `clear_roi`): executes immediately, returns a `CommandResponse`, and does not change the FSM state. Commands are only accepted in `DISARMED` and `IDLE`; they are `DENIED` in `RUNNING` and `HANDOVER`.
+
+### ROI (Region of Interest)
+
+`VehicleContext` stores an optional `GlobalPosition` as the active ROI. The driver writes to it via `update_roi()` / `clear_roi()` after forwarding the command to the autopilot. The API exposes `get_roi()` for consumers that need to read current ROI state.

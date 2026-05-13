@@ -23,7 +23,12 @@ void cancel_operation();
 ```cpp
 CommandResponse arm();
 CommandResponse disarm();
+CommandResponse set_roi(GlobalPosition position,
+                        ReferenceFrame frame = GLOBAL_WGS84);
+CommandResponse clear_roi();
 ```
+
+Commands return immediately. `set_roi` and `clear_roi` are only accepted in `IDLE` or `DISARMED` states; they return `DENIED` if the controller is `RUNNING` or `HANDOVER`. If the active driver does not support the requested frame, `NOT_SUPPORTED` is returned.
 
 ## Read-only state
 
@@ -33,6 +38,7 @@ const OperationReport* last_operation_report() const;
 GlobalPosition global_position() const;
 Kinematics kinematics() const;
 VehicleStatus vehicle_status() const;
+std::optional<GlobalPosition> get_roi() const;
 ```
 
 ## Event callbacks
