@@ -50,9 +50,9 @@ constants::CommandResponse OperationalController::IdleState::try_execute(
   return constants::CommandResponse::ACCEPTED;
 }
 
-void OperationalController::IdleState::try_command(
+constants::CommandResponse OperationalController::IdleState::try_command(
     OperationalController& ctx, std::unique_ptr<VehicleCommand> cmd) {
-  cmd->execute(ctx.dispatcher_);
+  return cmd->execute(ctx.dispatcher_);
 }
 
 }  // namespace arch_nav::controller

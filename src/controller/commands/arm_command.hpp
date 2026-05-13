@@ -7,8 +7,8 @@ namespace arch_nav::controller {
 
 class ArmCommand : public VehicleCommand {
  public:
-  void execute(platform::ICommandDispatcher& dispatcher) override {
-    dispatcher.execute_arm();
+  constants::CommandResponse execute(platform::ICommandDispatcher& dispatcher) override {
+    return dispatcher.execute_arm();
   }
 };
 

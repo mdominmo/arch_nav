@@ -11,6 +11,7 @@
 #include "arch_nav/constants/vehicle_status_states.hpp"
 #include "arch_nav/context/vehicle_context.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
+#include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/report/operation_report.hpp"
 #include "arch_nav/model/report/takeoff_driver_operation_data.hpp"
 #include "arch_nav/model/report/waypoint_driver_operation_data.hpp"
@@ -23,6 +24,7 @@ using namespace arch_nav::context;
 using namespace arch_nav::controller;
 using namespace arch_nav::platform;
 using namespace arch_nav::report;
+using arch_nav::vehicle::GlobalPosition;
 using arch_nav::vehicle::VehicleStatus;
 using arch_nav::vehicle::Waypoint;
 
@@ -31,13 +33,21 @@ using arch_nav::vehicle::Waypoint;
 // ─────────────────────────────────────────────────────────────────────────────
 
 struct MockDispatcher : public ICommandDispatcher {
-  bool accept_takeoff  = false;
-  bool accept_land     = false;
+  bool accept_takeoff    = false;
+  bool accept_land       = false;
   bool accept_change_yaw = false;
+  bool accept_set_roi    = false;
   std::function<void()> stored_complete;
 
   CommandResponse execute_arm()    override { return CommandResponse::ACCEPTED; }
   CommandResponse execute_disarm() override { return CommandResponse::ACCEPTED; }
+
+  CommandResponse execute_set_roi(
+      arch_nav::vehicle::GlobalPosition, ReferenceFrame) override {
+    return accept_set_roi ? CommandResponse::ACCEPTED : CommandResponse::NOT_SUPPORTED;
+  }
+
+  CommandResponse execute_clear_roi() override { return CommandResponse::ACCEPTED; }
 
   CommandResponse execute_takeoff(
       double, ReferenceFrame,
@@ -407,4 +417,74 @@ TEST_F(OperationalControllerTest, Callback_OnProgressStopsAfterOperationComplete
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
   EXPECT_EQ(call_count.load(), count_at_complete);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROI command
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, SetRoi_AcceptedInIdle) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_set_roi = true;
+
+  auto resp = ctrl_.set_roi(
+      GlobalPosition{40.0, -3.0, 100.0}, ReferenceFrame::GLOBAL_WGS84);
+
+  EXPECT_EQ(resp, CommandResponse::ACCEPTED);
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+}
+
+TEST_F(OperationalControllerTest, SetRoi_NotSupportedPropagatedFromDriver) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_set_roi = false;
+
+  auto resp = ctrl_.set_roi(
+      GlobalPosition{40.0, -3.0, 100.0}, ReferenceFrame::GLOBAL_WGS84);
+
+  EXPECT_EQ(resp, CommandResponse::NOT_SUPPORTED);
+}
+
+TEST_F(OperationalControllerTest, SetRoi_AcceptedInDisarmed) {
+  context_.update(kernel_disarmed());
+  dispatcher_.accept_set_roi = true;
+
+  auto resp = ctrl_.set_roi(
+      GlobalPosition{40.0, -3.0, 100.0}, ReferenceFrame::GLOBAL_WGS84);
+
+  EXPECT_EQ(resp, CommandResponse::ACCEPTED);
+}
+
+TEST_F(OperationalControllerTest, SetRoi_DeniedInRunning) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+  dispatcher_.accept_set_roi = true;
+
+  auto resp = ctrl_.set_roi(
+      GlobalPosition{40.0, -3.0, 100.0}, ReferenceFrame::GLOBAL_WGS84);
+
+  EXPECT_EQ(resp, CommandResponse::DENIED);
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+TEST_F(OperationalControllerTest, SetRoi_DeniedInHandover) {
+  dispatcher_.accept_set_roi = true;
+
+  auto resp = ctrl_.set_roi(
+      GlobalPosition{40.0, -3.0, 100.0}, ReferenceFrame::GLOBAL_WGS84);
+
+  EXPECT_EQ(resp, CommandResponse::DENIED);
+}
+
+TEST_F(OperationalControllerTest, ClearRoi_AcceptedInIdle) {
+  context_.update(kernel_armed());
+  EXPECT_EQ(ctrl_.clear_roi(), CommandResponse::ACCEPTED);
+}
+
+TEST_F(OperationalControllerTest, ClearRoi_DeniedInRunning) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
+
+  EXPECT_EQ(ctrl_.clear_roi(), CommandResponse::DENIED);
 }

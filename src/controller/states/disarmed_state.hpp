@@ -9,7 +9,7 @@
 namespace arch_nav::controller {
 
 struct OperationalController::DisarmedState : OperationalController::State {
-  void try_command(
+  constants::CommandResponse try_command(
       OperationalController& ctx,
       std::unique_ptr<VehicleCommand> cmd) override;
   void on_vehicle_status_update(

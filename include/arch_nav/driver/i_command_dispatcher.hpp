@@ -8,6 +8,7 @@
 #include "arch_nav/constants/reference_frame.hpp"
 #include "arch_nav/model/report/takeoff_driver_operation_data.hpp"
 #include "arch_nav/model/report/waypoint_driver_operation_data.hpp"
+#include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
 
@@ -53,6 +54,15 @@ class ICommandDispatcher {
   }
 
   virtual constants::CommandResponse execute_disarm() {
+    return constants::CommandResponse::NOT_SUPPORTED;
+  }
+
+  virtual constants::CommandResponse execute_set_roi(
+      vehicle::GlobalPosition, constants::ReferenceFrame) {
+    return constants::CommandResponse::NOT_SUPPORTED;
+  }
+
+  virtual constants::CommandResponse execute_clear_roi() {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 

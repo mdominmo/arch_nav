@@ -40,6 +40,21 @@ void VehicleContext::update(const VehicleStatus& state) {
   vehicle_status_.set(state);
 }
 
+std::optional<GlobalPosition> VehicleContext::get_roi() const {
+  shared_lock<shared_mutex> lock(roi_mutex_);
+  return roi_;
+}
+
+void VehicleContext::update_roi(const GlobalPosition& roi) {
+  unique_lock<shared_mutex> lock(roi_mutex_);
+  roi_ = roi;
+}
+
+void VehicleContext::clear_roi() {
+  unique_lock<shared_mutex> lock(roi_mutex_);
+  roi_.reset();
+}
+
 void VehicleContext::subscribe_vehicle_status(
     std::function<void(const VehicleStatus&)> callback) {
   vehicle_status_.subscribe(std::move(callback));

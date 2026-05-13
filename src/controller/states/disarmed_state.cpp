@@ -10,11 +10,11 @@
 
 namespace arch_nav::controller {
 
-void OperationalController::DisarmedState::try_command(
+constants::CommandResponse OperationalController::DisarmedState::try_command(
     OperationalController& ctx, std::unique_ptr<VehicleCommand> cmd) {
   if (cmd_) cmd_->cancel(ctx.dispatcher_);
   cmd_ = std::move(cmd);
-  cmd_->execute(ctx.dispatcher_);
+  return cmd_->execute(ctx.dispatcher_);
 }
 
 void OperationalController::DisarmedState::on_vehicle_status_update(

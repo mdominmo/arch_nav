@@ -42,6 +42,29 @@ TEST(VehicleContext, UpdateKinematicSkipsNaN) {
   EXPECT_TRUE(std::isnan(kin.x));
 }
 
+TEST(VehicleContext, RoiDefaultsToEmpty) {
+  VehicleContext manager;
+  EXPECT_FALSE(manager.get_roi().has_value());
+}
+
+TEST(VehicleContext, UpdateRoiStoresValue) {
+  VehicleContext manager;
+  GlobalPosition roi{40.0, -3.0, 100.0};
+  manager.update_roi(roi);
+  auto stored = manager.get_roi();
+  ASSERT_TRUE(stored.has_value());
+  EXPECT_DOUBLE_EQ(stored->lat, 40.0);
+  EXPECT_DOUBLE_EQ(stored->lon, -3.0);
+  EXPECT_DOUBLE_EQ(stored->alt, 100.0);
+}
+
+TEST(VehicleContext, ClearRoiResetsToEmpty) {
+  VehicleContext manager;
+  manager.update_roi(GlobalPosition{40.0, -3.0, 100.0});
+  manager.clear_roi();
+  EXPECT_FALSE(manager.get_roi().has_value());
+}
+
 TEST(VehicleContext, UpdateVehicleStatus) {
   VehicleContext manager;
   VehicleStatus state(ControlState::KERNEL_CONTROLLED, ArmState::ARMED);
