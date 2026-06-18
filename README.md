@@ -22,4 +22,4 @@ Use the provided helper scripts to manage the build:
 - `scripts/clean.sh` — clean previous build artifacts
 - `scripts/build.sh` — configure and build the project
 
-For more advanced installations and platform-specific setup, refer to the full documentation: https://mdominmo.github.io/arch-nav/
+For more advanced installations and platform-specific setup, refer to the full documentation: https://mdominmo.github.io/arch_nav/
