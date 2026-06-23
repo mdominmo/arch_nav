@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://github.com/mdominmo/arch-nav/architecture/operations/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Operations Model - arch_nav</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/landing.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Operations Model";
+        var mkdocs_page_input_path = "architecture/operations.md";
+        var mkdocs_page_url = "/mdominmo/arch-nav/architecture/operations/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> arch_nav
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-started/first-run/">First Run</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Architecture</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Overview</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Operations Model</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#navigation-tasks">Navigation Tasks</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#characteristics">Characteristics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#flow">Flow</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#imperative-commands">Imperative Commands</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#characteristics_1">Characteristics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#when-to-use-a-command">When to use a command</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#flow_1">Flow</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#roi-and-operationcontext">ROI and OperationContext</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#context-updates">Context Updates</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#characteristics_2">Characteristics</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#when-to-use-a-context-update">When to use a context update</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#flow_2">Flow</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#comparison">Comparison</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#data-flow-direction">Data flow direction</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../driver-lifecycle/">Driver Lifecycle</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/arch-nav/">ArchNav</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/arch-nav-api/">ArchNavApi</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/driver-interfaces/">Driver Interfaces</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Development</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../development/build-and-test/">Build & Test</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../development/writing-drivers/">Writing Drivers</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../development/concurrency-notes/">Concurrency Notes</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">arch_nav</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Architecture</li>
+      <li class="breadcrumb-item active">Operations Model</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/mdominmo/arch-nav/edit/master/docs/architecture/operations.md">Edit on mdominmo/arch-nav</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="operations-model">Operations Model<a class="headerlink" href="#operations-model" title="Permanent link">&para;</a></h1>
+<p>The kernel classifies every action that the API exposes into one of three categories depending on its semantics, its relationship with the platform driver, and the guarantees it provides to the caller.</p>
+<h2 id="navigation-tasks">Navigation Tasks<a class="headerlink" href="#navigation-tasks" title="Permanent link">&para;</a></h2>
+<p>Navigation tasks are long-running operations that move the vehicle through space.</p>
+<p><strong>Examples:</strong> <code>takeoff</code>, <code>land</code>, <code>waypoint_following</code>, <code>trajectory_execution</code>, <code>change_yaw</code>.</p>
+<h3 id="characteristics">Characteristics<a class="headerlink" href="#characteristics" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The controller transitions to <code>RUNNING</code> when the driver accepts the task.</li>
+<li>Only one navigation task can be active at a time. A new task is <code>DENIED</code> while another is in progress.</li>
+<li>Completion is asynchronous: the driver invokes a callback when the operation finishes, and the controller transitions back to <code>IDLE</code>.</li>
+<li>Progress is reported periodically through <code>on_operation_progress</code>.</li>
+<li>The task can be interrupted externally (<code>cancel_operation</code>) or by a state change (disarm, control loss), which aborts the task and notifies via <code>on_operation_complete</code> with status <code>ABORTED</code>.</li>
+</ul>
+<h3 id="flow">Flow<a class="headerlink" href="#flow" title="Permanent link">&para;</a></h3>
+<pre><code>API ──▸ OperationalController ──▸ NavigationTask::start()
+           │                            │
+           │  state → RUNNING           ▼
+           │                     ICommandDispatcher::execute_*()
+           │                            │
+           │                            ▼
+           │                      Platform Driver ──▸ FMU
+           │                            │
+           │  ◂── on_complete() ────────┘
+           │
+           │  state → IDLE
+           ▼
+    on_operation_complete(report)
+</code></pre>
+<h2 id="imperative-commands">Imperative Commands<a class="headerlink" href="#imperative-commands" title="Permanent link">&para;</a></h2>
+<p>Commands are point-in-time actions that require explicit confirmation from the platform driver.</p>
+<p><strong>Examples:</strong> <code>arm</code>, <code>disarm</code>, <code>set_roi</code>, <code>clear_roi</code>.</p>
+<h3 id="characteristics_1">Characteristics<a class="headerlink" href="#characteristics_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The driver must accept or reject the command synchronously via <code>CommandResponse</code> (<code>ACCEPTED</code>, <code>DENIED</code>, <code>NOT_SUPPORTED</code>).</li>
+<li>Commands do not change the controller state machine — the controller remains in its current state after execution.</li>
+<li>Only accepted in <code>IDLE</code> and <code>DISARMED</code>; they are <code>DENIED</code> in <code>RUNNING</code> and <code>HANDOVER</code>.</li>
+<li>There is no completion callback — the response itself is the confirmation.</li>
+</ul>
+<h3 id="when-to-use-a-command">When to use a command<a class="headerlink" href="#when-to-use-a-command" title="Permanent link">&para;</a></h3>
+<p>A command is appropriate when the caller needs <strong>a guarantee that the platform processed the request</strong>. This typically applies to:</p>
+<ul>
+<li>Safety-critical operations: arming, disarming.</li>
+<li>Actions that the FMU must acknowledge: setting a ROI that drives gimbal control, establishing a geofence imposed by regulation.</li>
+<li>Any action where a <code>DENIED</code> response must prevent the operation from proceeding.</li>
+</ul>
+<h3 id="flow_1">Flow<a class="headerlink" href="#flow_1" title="Permanent link">&para;</a></h3>
+<pre><code>API ──▸ OperationalController ──▸ VehicleCommand::execute()
+                                        │
+                                        ▼
+                                 ICommandDispatcher::execute_*()
+                                        │
+                                        ▼
+                                  Platform Driver ──▸ FMU
+                                        │
+                              CommandResponse ◂────┘
+</code></pre>
+<h3 id="roi-and-operationcontext">ROI and OperationContext<a class="headerlink" href="#roi-and-operationcontext" title="Permanent link">&para;</a></h3>
+<p><code>set_roi</code> and <code>clear_roi</code> are commands because they require FMU confirmation. However, the ROI value itself is operational state — it describes what the operator wants, not what the vehicle reports about itself.</p>
+<p>For this reason, the confirmed ROI is stored in <code>OperationContext</code> (not in <code>VehicleContext</code>). The command confirms with the driver first, then writes to the operation context on success. This preserves the command's confirmation guarantee while keeping operational state in the right place.</p>
+<h2 id="context-updates">Context Updates<a class="headerlink" href="#context-updates" title="Permanent link">&para;</a></h2>
+<p>Context updates are declarative, non-imperative actions that inform the kernel about the state of the world without requiring confirmation from the platform.</p>
+<p><strong>Examples:</strong> <code>set_obstacle_info</code>, <code>remove_obstacle</code>, <code>clear_obstacles</code>.</p>
+<h3 id="characteristics_2">Characteristics<a class="headerlink" href="#characteristics_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The caller writes information to <code>OperationContext</code>. There is no round-trip to the driver and no <code>CommandResponse</code>.</li>
+<li>The platform driver can <strong>react</strong> to context changes by subscribing to <code>OperationContext</code> (e.g. <code>subscribe_obstacles</code>), but this is at its discretion — the kernel does not enforce it.</li>
+<li>Context updates are accepted regardless of the controller state. Informing the system about an obstacle is valid whether the vehicle is idle, running a mission, or disarmed.</li>
+<li>The data model supports identification (<code>Obstacle::id</code>), which allows updating the position of a known obstacle without creating duplicates.</li>
+</ul>
+<h3 id="when-to-use-a-context-update">When to use a context update<a class="headerlink" href="#when-to-use-a-context-update" title="Permanent link">&para;</a></h3>
+<p>A context update is appropriate when:</p>
+<ul>
+<li>The information describes the <strong>environment</strong>, not a command to the vehicle.</li>
+<li>There is no meaningful concept of the platform "rejecting" the information.</li>
+<li>The data may be updated at high frequency (sensor-rate obstacle feeds).</li>
+<li>The driver should decide autonomously how and when to act on the information.</li>
+</ul>
+<h3 id="flow_2">Flow<a class="headerlink" href="#flow_2" title="Permanent link">&para;</a></h3>
+<pre><code>API ──▸ OperationalController ──▸ ContextUpdate::apply()
+                                        │
+                                        ▼
+                                  OperationContext
+                                        │
+                              subscribe ─┤
+                                        ▼
+                                  Platform Driver
+                                  (reacts at its discretion)
+</code></pre>
+<h2 id="comparison">Comparison<a class="headerlink" href="#comparison" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Navigation Task</th>
+<th>Imperative Command</th>
+<th>Context Update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Semantics</strong></td>
+<td>"Do this movement"</td>
+<td>"Execute this action"</td>
+<td>"This is what I know"</td>
+</tr>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Long-running</td>
+<td>Instantaneous</td>
+<td>Instantaneous</td>
+</tr>
+<tr>
+<td><strong>Confirmation</strong></td>
+<td>Async callback</td>
+<td>Synchronous response</td>
+<td>None</td>
+</tr>
+<tr>
+<td><strong>Controller state</strong></td>
+<td>Transitions to <code>RUNNING</code></td>
+<td>No transition</td>
+<td>No transition</td>
+</tr>
+<tr>
+<td><strong>State restriction</strong></td>
+<td><code>IDLE</code> only</td>
+<td><code>IDLE</code> / <code>DISARMED</code></td>
+<td>Any state</td>
+</tr>
+<tr>
+<td><strong>Driver role</strong></td>
+<td>Executes and reports</td>
+<td>Executes and confirms</td>
+<td>Reads and reacts (optional)</td>
+</tr>
+<tr>
+<td><strong>Examples</strong></td>
+<td>takeoff, waypoint following</td>
+<td>arm, set_roi, geofence</td>
+<td>obstacle info, weather data</td>
+</tr>
+</tbody>
+</table>
+<h2 id="data-flow-direction">Data flow direction<a class="headerlink" href="#data-flow-direction" title="Permanent link">&para;</a></h2>
+<p>The two context objects reflect opposite data flows:</p>
+<ul>
+<li><strong>VehicleContext</strong> (driver → kernel): the driver writes telemetry from the FMU, the kernel and API read it. Represents what the vehicle reports about itself.</li>
+<li><strong>OperationContext</strong> (API/kernel → driver): the API or kernel writes operational intent and situational awareness, the driver reads it. Represents what the operator knows or wants.</li>
+</ul>
+<p>This separation ensures that each context has a single authoritative writer direction and a clear semantic boundary.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../overview/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../driver-lifecycle/" class="btn btn-neutral float-right" title="Driver Lifecycle">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/mdominmo/arch-nav" class="fa fa-code-fork" style="color: #fcfcfc"> mdominmo/arch-nav</a>
+        </span>
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../driver-lifecycle/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
