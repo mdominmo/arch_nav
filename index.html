@@ -123,32 +123,6 @@
 <h2 id="what-is-arch_nav">What is arch_nav<a class="headerlink" href="#what-is-arch_nav" title="Permanent link">&para;</a></h2>
 <p>arch_nav is a navigation kernel that decouples UAV application logic from the underlying autopilot. It provides a single API that works across PX4, ArduPilot, or any autopilot for which a driver plugin exists. Applications built on arch_nav can switch autopilot stacks without rewriting navigation code.</p>
 <hr />
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<p>The kernel is organized around a state machine, two context objects, and a plugin-based driver system.</p>
-<ul>
-<li>
-<p><strong><a href="architecture/overview/">Architecture Overview</a></strong> — Core components, runtime flow, and state model (<code>HANDOVER</code>, <code>DISARMED</code>, <code>IDLE</code>, <code>RUNNING</code>).</p>
-</li>
-<li>
-<p><strong><a href="architecture/operations/">Operations Model</a></strong> — The three action categories and their design rationale:</p>
-<ul>
-<li><strong>Navigation Tasks</strong> — Long-running operations (takeoff, waypoint following, trajectory execution) that drive the vehicle through space.</li>
-<li><strong>Imperative Commands</strong> — Point-in-time actions (arm, disarm, set ROI) that require explicit confirmation from the platform.</li>
-<li><strong>Context Updates</strong> — Declarative writes (obstacle info) that inform the system about the environment without requiring platform acknowledgement.</li>
-</ul>
-</li>
-<li>
-<p><strong><a href="architecture/driver-lifecycle/">Driver Lifecycle</a></strong> — How drivers are loaded, started, and shut down. The separation between <code>IPlatformDriver</code> (telemetry boundary) and <code>ICommandDispatcher</code> (command boundary).</p>
-</li>
-</ul>
-<hr />
-<h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong><a href="api/arch-nav/">ArchNav</a></strong> — Top-level entry point. Creates the kernel, loads a driver plugin, and exposes the API.</li>
-<li><strong><a href="api/arch-nav-api/">ArchNavApi</a></strong> — The user-facing API: operations, commands, context updates, state queries, and event callbacks.</li>
-<li><strong><a href="api/driver-interfaces/">Driver Interfaces</a></strong> — The contracts a driver must implement: <code>IPlatformDriver</code> and <code>ICommandDispatcher</code>.</li>
-</ul>
-<hr />
 <h2 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><a href="development/build-and-test/">Build &amp; Test</a></strong> — How to build the library, run tests, and integrate in your project.</li>
@@ -168,12 +142,7 @@
 <li><strong><a href="getting-started/first-run/">First Run</a></strong> — A minimal mission flow from arm to waypoint following.</li>
 </ul>
 <hr />
-<details>
-<summary><strong>Citing arch_nav</strong></summary>
-
-<br>
-
-
+<h2 id="citing-this-tool">Citing this tool<a class="headerlink" href="#citing-this-tool" title="Permanent link">&para;</a></h2>
 <pre><code class="language-bibtex">@software{dominguez2025archnav,
   author       = {Dominguez, Manuel},
   title        = {arch\_nav: A Platform-Agnostic UAV Navigation Kernel},
@@ -181,11 +150,7 @@
   url          = {https://github.com/mdominmo/arch-nav}
 }
 </code></pre>
-
-
-</details>
-
-<p><br></p>
+<hr />
 <p align="center"><em>Created by Manuel Dominguez</em></p>
               
             </div>
@@ -239,5 +204,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-06-23 13:46:48.261964+00:00
+Build Date UTC : 2026-06-23 13:49:18.531314+00:00
 -->
