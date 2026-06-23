@@ -20,6 +20,7 @@ add_library(arch_nav SHARED
   src/controller/tasks/waypoint_task.cpp
   src/controller/tasks/trajectory_execution_task.cpp
   src/context/vehicle_context.cpp
+  src/context/operation_context.cpp
   src/utils/gnss_local_frame.cpp
   src/utils/frame_converter.cpp
   src/arch_nav_api.cpp
@@ -64,6 +65,7 @@ if(BUILD_TESTING)
   add_arch_nav_test(test_kinematics test/unit/core/state/test_kinematics.cpp)
   add_arch_nav_test(test_vehicle_status test/unit/core/state/test_vehicle_status.cpp)
   add_arch_nav_test(test_vehicle_context test/unit/core/context/test_vehicle_context.cpp)
+  add_arch_nav_test(test_operation_context test/unit/core/context/test_operation_context.cpp)
 
   add_arch_nav_test(test_gnss_local_frame test/unit/utils/test_gnss_local_frame.cpp)
 

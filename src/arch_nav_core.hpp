@@ -2,6 +2,7 @@
 #define ARCH_NAV_ARCH_NAV_CORE_HPP_
 
 #include "arch_nav/context/vehicle_context.hpp"
+#include "arch_nav/context/operation_context.hpp"
 #include "controller/operational_controller.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
 #include "arch_nav/arch_nav_api.hpp"
@@ -13,10 +14,12 @@ class ArchNavCore {
   explicit ArchNavCore(platform::ICommandDispatcher& dispatcher);
 
   ArchNavApi& api();
-  context::VehicleContext& context();
+  context::VehicleContext& vehicle_context();
+  context::OperationContext& operation_context();
 
  private:
-  context::VehicleContext           context_;
+  context::VehicleContext           vehicle_context_;
+  context::OperationContext         operation_context_;
   controller::OperationalController controller_;
   ArchNavApi                        api_;
 };

@@ -10,6 +10,7 @@
 #include "arch_nav/constants/reference_frame.hpp"
 #include "arch_nav/constants/vehicle_status_states.hpp"
 #include "arch_nav/context/vehicle_context.hpp"
+#include "arch_nav/context/operation_context.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
 #include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/report/operation_report.hpp"
@@ -100,8 +101,9 @@ static VehicleStatus unknown_status() {
 class OperationalControllerTest : public ::testing::Test {
  protected:
   VehicleContext        context_;
+  arch_nav::context::OperationContext operation_context_;
   MockDispatcher        dispatcher_;
-  OperationalController ctrl_{context_, dispatcher_};
+  OperationalController ctrl_{context_, operation_context_, dispatcher_};
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

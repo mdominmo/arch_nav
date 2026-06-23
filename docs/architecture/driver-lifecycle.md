@@ -9,7 +9,7 @@
 
 1. Plugin `.so` is loaded.
 2. Driver factory registers under a unique name.
-3. `IPlatformDriver::start(context, update_period)` begins telemetry feed.
+3. `IPlatformDriver::start(vehicle_context, operation_context, update_period)` begins telemetry feed and gives the driver access to operational state.
 4. `dispatcher()` exposes the command interface used by the kernel.
 
 ## Operation execution

@@ -1,11 +1,15 @@
 site_name: arch_nav
-site_description: Platform-agnostic UAV navigation kernel
+site_description: Platform-agnostic UAV navigation kernel written in C++17
 site_url: https://github.com/mdominmo/arch-nav
 repo_url: https://github.com/mdominmo/arch-nav
 repo_name: mdominmo/arch-nav
 
 theme:
-  name: mkdocs
+  name: readthedocs
+  custom_dir: docs/overrides
+
+extra_css:
+  - css/landing.css
 
 nav:
   - Home: index.md
@@ -14,6 +18,7 @@ nav:
       - First Run: getting-started/first-run.md
   - Architecture:
       - Overview: architecture/overview.md
+      - Operations Model: architecture/operations.md
       - Driver Lifecycle: architecture/driver-lifecycle.md
   - API Reference:
       - ArchNav: api/arch-nav.md
@@ -26,5 +31,6 @@ nav:
 
 markdown_extensions:
   - admonition
+  - attr_list
   - toc:
       permalink: true

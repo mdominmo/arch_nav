@@ -11,12 +11,15 @@ Headers:
 class IPlatformDriver {
 public:
   virtual ICommandDispatcher& dispatcher() = 0;
-  virtual void start(context::VehicleContext& context,
+  virtual void start(context::VehicleContext& vehicle_context,
+                     context::OperationContext& operation_context,
                      std::chrono::milliseconds update_period) = 0;
   virtual void stop() = 0;
   virtual ~IPlatformDriver() = default;
 };
 ```
+
+The driver receives both contexts on startup: `VehicleContext` to write telemetry into, and `OperationContext` to read operational state from (ROI, obstacles, etc.).
 
 ## `ICommandDispatcher`
 
@@ -38,4 +41,4 @@ Supported hooks include:
 
 All `execute_*` methods return a `CommandResponse` immediately. `ACCEPTED` means the driver has started the operation; `DENIED` means the autopilot rejected it; `NOT_SUPPORTED` means the driver or the requested frame is not handled.
 
-`execute_set_roi` and `execute_clear_roi` are point-in-time commands — the controller calls them and does not wait for a completion callback. If the driver stores ROI state it should write it to `VehicleContext` via `update_roi()` / `clear_roi()`.
+`execute_set_roi` and `execute_clear_roi` are point-in-time commands — the controller calls them and does not wait for a completion callback. On `ACCEPTED`, the controller writes the confirmed ROI to `OperationContext`. The driver does not need to update the context itself.
