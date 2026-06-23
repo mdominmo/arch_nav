@@ -5,7 +5,8 @@
 - `ArchNav`: top-level entry point (`create`, `api`).
 - `ArchNavApi`: user-facing non-blocking navigation API.
 - `OperationalController`: state machine and operation orchestration.
-- `VehicleContext`: live vehicle state storage and subscriptions.
+- `VehicleContext`: live vehicle state (telemetry) written by the driver, read by the kernel.
+- `OperationContext`: operational intent and situational awareness written by the API/kernel, read by the driver.
 - `DriverRegistry` + `DriverPluginLoader`: runtime plugin discovery and instantiation.
 
 ## Runtime flow
@@ -16,6 +17,7 @@
 4. Driver telemetry updates `VehicleContext`.
 5. API calls route to `OperationalController`.
 6. Controller dispatches operations to the driver through `ICommandDispatcher`.
+7. Context updates (obstacles, etc.) are written to `OperationContext`; the driver can subscribe to react.
 
 ## State model
 
@@ -26,13 +28,10 @@ The operation state exposed by the controller/API:
 - `IDLE`
 - `RUNNING`
 
-### Command vs NavigationTask
+## Action categories
 
-The controller distinguishes two kinds of actions:
+The kernel classifies API actions into three categories. See [Operations Model](operations.md) for a detailed description.
 
-- **NavigationTask** (`takeoff`, `waypoint_following`, `trajectory_execution`): moves the state to `RUNNING` and fires `on_operation_complete` when finished.
-- **Command** (`arm`, `disarm`, `set_roi`, `clear_roi`): executes immediately, returns a `CommandResponse`, and does not change the FSM state. Commands are only accepted in `DISARMED` and `IDLE`; they are `DENIED` in `RUNNING` and `HANDOVER`.
-
-### ROI (Region of Interest)
-
-`VehicleContext` stores an optional `GlobalPosition` as the active ROI. The driver writes to it via `update_roi()` / `clear_roi()` after forwarding the command to the autopilot. The API exposes `get_roi()` for consumers that need to read current ROI state.
+- **Navigation Tasks** (`takeoff`, `waypoint_following`, `trajectory_execution`, ...): long-running operations that transition the controller to `RUNNING`.
+- **Imperative Commands** (`arm`, `disarm`, `set_roi`, `clear_roi`): instantaneous actions that require driver confirmation. Accepted in `DISARMED` and `IDLE`.
+- **Context Updates** (`set_obstacle_info`, `remove_obstacle`, ...): declarative writes to `OperationContext` that do not go through the driver. Accepted in any state.

@@ -7,6 +7,7 @@
 
 namespace arch_nav::context {
 class VehicleContext;
+class OperationContext;
 }
 
 namespace arch_nav::platform {
@@ -17,7 +18,8 @@ class IPlatformDriver {
 
   virtual ICommandDispatcher& dispatcher() = 0;
 
-  virtual void start(context::VehicleContext& context,
+  virtual void start(context::VehicleContext& vehicle_context,
+                     context::OperationContext& operation_context,
                      std::chrono::milliseconds update_period) = 0;
 
   virtual void stop() = 0;

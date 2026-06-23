@@ -18,7 +18,7 @@ CommandResponse trajectory_execution(std::vector<TrajectoryPoint>, ReferenceFram
 void cancel_operation();
 ```
 
-## Vehicle commands
+## Imperative commands
 
 ```cpp
 CommandResponse arm();
@@ -28,7 +28,19 @@ CommandResponse set_roi(GlobalPosition position,
 CommandResponse clear_roi();
 ```
 
-Commands return immediately. `set_roi` and `clear_roi` are only accepted in `IDLE` or `DISARMED` states; they return `DENIED` if the controller is `RUNNING` or `HANDOVER`. If the active driver does not support the requested frame, `NOT_SUPPORTED` is returned.
+Commands return immediately. `set_roi` and `clear_roi` are only accepted in `IDLE` or `DISARMED` states; they return `DENIED` if the controller is `RUNNING` or `HANDOVER`. If the active driver does not support the requested frame, `NOT_SUPPORTED` is returned. On `ACCEPTED`, the confirmed ROI is written to `OperationContext`.
+
+## Context updates
+
+```cpp
+void set_obstacle_info(std::vector<Obstacle> obstacles);
+void remove_obstacle(const std::string& id);
+void clear_obstacles();
+```
+
+Context updates write directly to `OperationContext` without going through the platform driver. They are accepted in any controller state. See [Operations Model](../architecture/operations.md) for the rationale behind context updates vs imperative commands.
+
+Obstacles are modeled as identifiable cylinders (`Obstacle{id, position, radius, height}`). The driver can subscribe to obstacle changes via `OperationContext::subscribe_obstacles`.
 
 ## Read-only state
 
@@ -39,6 +51,7 @@ GlobalPosition global_position() const;
 Kinematics kinematics() const;
 VehicleStatus vehicle_status() const;
 std::optional<GlobalPosition> get_roi() const;
+std::vector<Obstacle> get_obstacles() const;
 ```
 
 ## Event callbacks

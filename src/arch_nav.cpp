@@ -73,7 +73,9 @@ std::unique_ptr<ArchNav> ArchNav::create(std::chrono::milliseconds context_updat
   impl->core = std::make_unique<ArchNavCore>(
       impl->driver->dispatcher());
 
-  impl->driver->start(impl->core->context(), context_update_period);
+  impl->driver->start(impl->core->vehicle_context(),
+                      impl->core->operation_context(),
+                      context_update_period);
 
   return std::unique_ptr<ArchNav>(new ArchNav(std::move(impl)));
 }

@@ -12,12 +12,15 @@
 #include "arch_nav/constants/operation_status.hpp"
 #include "arch_nav/constants/reference_frame.hpp"
 #include "controller/navigation_task.hpp"
+#include "controller/context_update.hpp"
 #include "arch_nav/model/report/operation_report.hpp"
 #include "controller/vehicle_command.hpp"
 #include "arch_nav/context/vehicle_context.hpp"
+#include "arch_nav/context/operation_context.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
 #include "arch_nav/model/vehicle/vehicle_status.hpp"
+#include "arch_nav/model/operation/obstacle.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
 
 namespace arch_nav::controller {
@@ -26,6 +29,7 @@ class OperationalController {
  public:
   explicit OperationalController(
       context::VehicleContext& vehicle_context,
+      context::OperationContext& operation_context,
       platform::ICommandDispatcher& dispatcher);
 
   ~OperationalController();
@@ -46,6 +50,10 @@ class OperationalController {
       vehicle::GlobalPosition position,
       constants::ReferenceFrame frame);
   constants::CommandResponse clear_roi();
+
+  void set_obstacle_info(std::vector<operation::Obstacle> obstacles);
+  void remove_obstacle(const std::string& id);
+  void clear_obstacles();
 
   constants::OperationStatus       operation_status() const;
   const report::OperationReport*   last_operation_report() const;
@@ -84,6 +92,7 @@ class OperationalController {
 
   mutable std::mutex                         mutex_;
   context::VehicleContext&                   vehicle_context_;
+  context::OperationContext&                 operation_context_;
   platform::ICommandDispatcher&              dispatcher_;
   std::unique_ptr<State>                     current_state_;
   constants::OperationStatus                 current_status_;

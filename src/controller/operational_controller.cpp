@@ -7,6 +7,7 @@
 #include "commands/clear_roi_command.hpp"
 #include "commands/disarm_command.hpp"
 #include "commands/set_roi_command.hpp"
+#include "context_updates/set_obstacle_info.hpp"
 #include "states/disarmed_state.hpp"
 #include "states/handover_state.hpp"
 #include "states/idle_state.hpp"
@@ -21,8 +22,10 @@ namespace arch_nav::controller {
 
 OperationalController::OperationalController(
     context::VehicleContext& vehicle_context,
+    context::OperationContext& operation_context,
     platform::ICommandDispatcher& dispatcher)
     : vehicle_context_(vehicle_context),
+      operation_context_(operation_context),
       dispatcher_(dispatcher),
       current_state_(nullptr),
       current_status_(constants::OperationStatus::HANDOVER) {
@@ -94,12 +97,28 @@ constants::CommandResponse OperationalController::set_roi(
     vehicle::GlobalPosition position, constants::ReferenceFrame frame) {
   std::lock_guard<std::mutex> lock(mutex_);
   return current_state_->try_command(
-      *this, std::make_unique<SetRoiCommand>(std::move(position), frame));
+      *this, std::make_unique<SetRoiCommand>(
+          std::move(position), frame, operation_context_));
 }
 
 constants::CommandResponse OperationalController::clear_roi() {
   std::lock_guard<std::mutex> lock(mutex_);
-  return current_state_->try_command(*this, std::make_unique<ClearRoiCommand>());
+  return current_state_->try_command(
+      *this, std::make_unique<ClearRoiCommand>(operation_context_));
+}
+
+void OperationalController::set_obstacle_info(
+    std::vector<operation::Obstacle> obstacles) {
+  auto update = std::make_unique<SetObstacleInfo>(std::move(obstacles));
+  update->apply(operation_context_);
+}
+
+void OperationalController::remove_obstacle(const std::string& id) {
+  operation_context_.remove_obstacle(id);
+}
+
+void OperationalController::clear_obstacles() {
+  operation_context_.clear_obstacles();
 }
 
 constants::OperationStatus OperationalController::operation_status() const {
