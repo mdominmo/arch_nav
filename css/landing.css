@@ -1,3 +1,9 @@
+/* ── Full-width override for readthedocs theme ── */
+
+.wy-nav-content {
+  max-width: none;
+}
+
 /* ── Landing page ── */
 
 .landing-hero {
