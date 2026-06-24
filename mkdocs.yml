@@ -1,5 +1,5 @@
-site_name: arch_nav
-site_description: Platform-agnostic UAV navigation kernel written in C++17
+site_name: Arch Nav
+site_description: Platform-agnostic UAV navigation kernel
 site_url: https://github.com/mdominmo/arch-nav
 repo_url: https://github.com/mdominmo/arch-nav
 repo_name: mdominmo/arch-nav

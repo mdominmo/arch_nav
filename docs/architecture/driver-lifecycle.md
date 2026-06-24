@@ -1,6 +1,6 @@
 # Driver Lifecycle
 
-`arch_nav` separates responsibilities between two driver interfaces:
+Arch Nav separates responsibilities between two driver interfaces:
 
 - `IPlatformDriver`: telemetry/startup/shutdown boundary.
 - `ICommandDispatcher`: command execution boundary.

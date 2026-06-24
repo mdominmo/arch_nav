@@ -1,110 +1,61 @@
-<div class="landing-hero" markdown>
 
-![arch_nav](img/arch_nav_logo.png)
+<p align="center">
+  <img src="img/arch_nav_logo.png" alt="Arch Nav logo" width="200">
+</p>
 
-# arch_nav
+<h1 align="center">Arch Nav</h1>
 
-<p class="tagline">Platform-agnostic UAV navigation kernel written in C++17</p>
+<p align="center">
+  <em>Platform-agnostic UAV navigation kernel</em>
+</p>
 
-</div>
-
-<div class="cta-row">
-  <a href="getting-started/installation/">Get Started</a>
-  <a href="architecture/overview/" class="secondary">Architecture</a>
-  <a href="https://github.com/mdominmo/arch-nav" class="secondary">GitHub</a>
-</div>
+<p align="center">
+  <a href="getting-started/installation/">Get Started</a> &nbsp;|&nbsp;
+  <a href="https://github.com/mdominmo/arch-nav">GitHub</a>
+</p>
 
 ---
 
-<div class="feature-grid" markdown>
+## What is Arch Nav
 
-<div class="feature-card" markdown>
+Arch Nav is a navigation kernel that decouples UAV application logic from the underlying autopilot. It provides a single API that works across PX4, ArduPilot, or any autopilot for which a driver plugin exists. Applications built on Arch Nav can switch autopilot stacks without rewriting navigation code.
 
-### Autopilot-independent
+---
 
-A single API works across PX4, ArduPilot, or any future autopilot. Swap the driver at link time or runtime without changing application code.
+## Who is this for
 
-</div>
+- **Drone developers** who need a clean abstraction over different autopilot stacks.
+- **Research groups** building experimental navigation and planning systems without being locked to a single platform.
+- **Companies** that develop and maintain robust UAV control software across multiple vehicle platforms.
 
-<div class="feature-card" markdown>
+---
 
-### Operations model
+## Development
 
-Three action categories designed for UAV operations: long-running **navigation tasks**, confirmed **imperative commands**, and reactive **context updates** for situational awareness.
+- **[Build & Test](development/build-and-test.md)** — How to build the library, run tests, and integrate in your project.
+- **[Writing Drivers](development/writing-drivers.md)** — Step-by-step guide to implementing a driver for a new autopilot.
+- **[Concurrency Notes](development/concurrency-notes.md)** — Threading model and synchronization guarantees.
 
-</div>
+---
 
-<div class="feature-card" markdown>
+## Getting Started
 
-### Plugin drivers
+- **[Installation](getting-started/installation.md)** — Dependencies and build instructions.
+- **[First Run](getting-started/first-run.md)** — A minimal mission flow from arm to waypoint following.
 
-Drivers are shared-library plugins discovered at runtime. Write a driver for your autopilot by implementing two interfaces: `IPlatformDriver` and `ICommandDispatcher`.
+---
 
-</div>
-
-<div class="feature-card" markdown>
-
-### Dual-context architecture
-
-`VehicleContext` carries telemetry from the vehicle; `OperationContext` carries intent and awareness from the operator. Clear data-flow direction, no cross-contamination.
-
-</div>
-
-</div>
-
-## Quick look
-
-```cpp
-#include <arch_nav/arch_nav.hpp>
-
-auto nav = arch_nav::ArchNav::create();
-auto& api = nav->api();
-
-api.arm();
-api.takeoff(10.0);
-
-api.on_operation_complete([&](const auto& report) {
-    std::vector<arch_nav::vehicle::Waypoint> wps = { /* ... */ };
-    api.waypoint_following(std::move(wps));
-});
-```
-
-## Documentation
-
-| Section | Contents |
-|---------|----------|
-| [Getting Started](getting-started/installation.md) | Install, build, and run a minimal mission flow. |
-| [Architecture](architecture/overview.md) | Kernel components, state model, and operations model. |
-| [API Reference](api/arch-nav-api.md) | Public headers and integration contracts. |
-| [Development](development/build-and-test.md) | Build/test workflows, driver authoring, concurrency notes. |
-
-## Who this is for
-
-- **Integrators** embedding `arch_nav` in ground stations, companion computers, or simulation harnesses.
-- **Driver authors** implementing `IPlatformDriver` and `ICommandDispatcher` for new autopilot stacks.
-- **Researchers** building on top of a documented, testable navigation abstraction.
-
-<div class="citation" markdown>
-
-<details>
-<summary>Citing arch_nav</summary>
+## Citing this tool
 
 ```bibtex
 @software{dominguez2025archnav,
-  author       = {Dom{\'\i}nguez, Manuel},
-  title        = {arch\_nav: A Platform-Agnostic UAV Navigation Kernel},
+  author       = {Dominguez, Manuel},
+  title        = {Arch Nav: A Platform-Agnostic UAV Navigation Kernel},
   year         = {2025},
-  url          = {https://github.com/mdominmo/arch-nav},
-  note         = {C++17 library}
+  url          = {https://github.com/mdominmo/arch-nav}
 }
 ```
 
-</details>
+---
 
-</div>
-
-<div class="author-block" markdown>
-
-Created by **Manuel Dominguez**
-
-</div>
+<p align="center"><em>Created by Manuel Dominguez</em></p>
