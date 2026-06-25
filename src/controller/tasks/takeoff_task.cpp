@@ -3,15 +3,16 @@
 namespace arch_nav::controller {
 
 TakeoffTask::TakeoffTask(double height, constants::ReferenceFrame frame)
-    : height_(height), frame_(frame) {}
+    : height_(height),
+      frame_(frame),
+      state_(std::make_shared<execution::TakeoffExecutionState>()) {}
 
 constants::CommandResponse TakeoffTask::start(
-    context::VehicleContext&,
     platform::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) {
   dispatcher_ = &dispatcher;
   return dispatcher.execute_takeoff(
-      height_, frame_, std::move(on_complete), report_->driver_data());
+      height_, frame_, std::move(on_complete), *state_);
 }
 
 void TakeoffTask::abort() {
@@ -19,9 +20,22 @@ void TakeoffTask::abort() {
 }
 
 std::shared_ptr<report::OperationReport> TakeoffTask::make_report() {
-  report_ = std::make_shared<report::TakeoffReport>();
-  report_->driver_data().target_altitude.store(height_);
-  return report_;
+  state_->target_altitude.store(height_);
+  return std::make_shared<report::TakeoffReport>(state_);
+}
+
+std::unique_ptr<NavigationTaskMemento> TakeoffTask::make_memento() const {
+  class TakeoffTaskMemento : public NavigationTaskMemento {
+    double height_;
+    constants::ReferenceFrame frame_;
+   public:
+    TakeoffTaskMemento(double h, constants::ReferenceFrame f)
+        : height_(h), frame_(f) {}
+    std::unique_ptr<NavigationTask> reconstruct() const override {
+      return std::make_unique<TakeoffTask>(height_, frame_);
+    }
+  };
+  return std::make_unique<TakeoffTaskMemento>(height_, frame_);
 }
 
 }  // namespace arch_nav::controller

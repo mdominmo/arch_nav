@@ -27,6 +27,10 @@ add_library(arch_nav SHARED
   src/arch_nav_core.cpp
   src/driver/driver_registry.cpp
   src/driver/driver_plugin_loader.cpp
+  src/supervisor/supervisor_chain.cpp
+  src/supervisor/supervisor_registry.cpp
+  src/supervisor/supervisor_plugin_loader.cpp
+  src/controller/states/preempted_state.cpp
   src/arch_nav.cpp
 )
 
@@ -48,6 +52,7 @@ target_include_directories(arch_nav
 
 target_compile_definitions(arch_nav PRIVATE
   ARCH_NAV_DEFAULT_DRIVER_SEARCH_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/arch_nav/drivers"
+  ARCH_NAV_DEFAULT_SUPERVISOR_SEARCH_PATH="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/arch_nav/supervisors"
 )
 
 if(BUILD_TESTING)
@@ -76,6 +81,24 @@ if(BUILD_TESTING)
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src)
   add_test(NAME test_operational_controller COMMAND test_operational_controller)
+
+  function(add_arch_nav_proxy_test test_name source_file)
+    add_executable(${test_name} ${source_file})
+    target_link_libraries(${test_name} PRIVATE arch_nav GTest::gtest_main)
+    target_include_directories(${test_name} PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+  endfunction()
+
+  add_arch_nav_proxy_test(test_vehicle_context_writer_proxy
+    test/unit/core/context/test_vehicle_context_writer_proxy.cpp)
+  add_arch_nav_proxy_test(test_vehicle_context_reader_proxy
+    test/unit/core/context/test_vehicle_context_reader_proxy.cpp)
+  add_arch_nav_proxy_test(test_operation_context_writer_proxy
+    test/unit/core/context/test_operation_context_writer_proxy.cpp)
+  add_arch_nav_proxy_test(test_operation_context_reader_proxy
+    test/unit/core/context/test_operation_context_reader_proxy.cpp)
 endif()
 
 install(DIRECTORY include/
@@ -131,6 +154,26 @@ if(DEFINED ENV{ARCH_NAV_DRIVERS})
       add_subdirectory(${_driver_dir} ${CMAKE_BINARY_DIR}/drivers/${_driver_name})
     else()
       message(WARNING "ARCH_NAV_DRIVERS: no CMakeLists.txt in ${_driver_dir}, skipping")
+    endif()
+  endforeach()
+endif()
+
+# Auto-discover supervisors inside supervisors/ subdirectory
+file(GLOB _supervisor_cmakes "${CMAKE_CURRENT_SOURCE_DIR}/supervisors/*/CMakeLists.txt")
+foreach(_supervisor_cmake ${_supervisor_cmakes})
+  get_filename_component(_supervisor_dir ${_supervisor_cmake} DIRECTORY)
+  add_subdirectory(${_supervisor_dir})
+endforeach()
+
+# Additional supervisors via ARCH_NAV_SUPERVISORS env var (colon-separated source paths)
+if(DEFINED ENV{ARCH_NAV_SUPERVISORS})
+  string(REPLACE ":" ";" _extra_supervisors "$ENV{ARCH_NAV_SUPERVISORS}")
+  foreach(_supervisor_dir ${_extra_supervisors})
+    if(EXISTS "${_supervisor_dir}/CMakeLists.txt")
+      get_filename_component(_supervisor_name ${_supervisor_dir} NAME)
+      add_subdirectory(${_supervisor_dir} ${CMAKE_BINARY_DIR}/supervisors/${_supervisor_name})
+    else()
+      message(WARNING "ARCH_NAV_SUPERVISORS: no CMakeLists.txt in ${_supervisor_dir}, skipping")
     endif()
   endforeach()
 endif()

@@ -16,14 +16,13 @@
 #include "arch_nav/model/vehicle/vehicle_status.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
-#include "arch_nav/model/operation/obstacle.hpp"
+#include "arch_nav/controller/preemption_event.hpp"
 
 namespace arch_nav::controller {
 class OperationalController;
 }
 namespace arch_nav::context {
 class VehicleContext;
-class OperationContext;
 }
 
 namespace arch_nav {
@@ -31,8 +30,7 @@ namespace arch_nav {
 class ArchNavApi {
  public:
   ArchNavApi(controller::OperationalController& controller,
-             context::VehicleContext& vehicle_context,
-             context::OperationContext& operation_context);
+             context::VehicleContext& vehicle_context);
   ~ArchNavApi();
 
   constants::CommandResponse takeoff(
@@ -57,21 +55,16 @@ class ArchNavApi {
       constants::ReferenceFrame frame = constants::ReferenceFrame::GLOBAL_WGS84);
   constants::CommandResponse clear_roi();
 
-  void set_obstacle_info(std::vector<operation::Obstacle> obstacles);
-  void remove_obstacle(const std::string& id);
-  void clear_obstacles();
-
   constants::OperationStatus       operation_status() const;
   const report::OperationReport*   last_operation_report() const;
 
   vehicle::GlobalPosition global_position() const;
   vehicle::Kinematics     kinematics() const;
   vehicle::VehicleStatus  vehicle_status() const;
-  std::optional<vehicle::GlobalPosition> get_roi() const;
-  std::vector<operation::Obstacle> get_obstacles() const;
 
   void on_operation_complete(std::function<void(const report::OperationReport&)> callback);
   void on_operation_progress(std::function<void(const report::OperationReport&)> callback);
+  void on_preemption_event(std::function<void(const controller::PreemptionEvent&)> callback);
 
  private:
   struct Impl;

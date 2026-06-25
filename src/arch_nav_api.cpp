@@ -2,28 +2,24 @@
 
 #include "controller/operational_controller.hpp"
 #include "arch_nav/context/vehicle_context.hpp"
-#include "arch_nav/context/operation_context.hpp"
 
 namespace arch_nav {
 
 struct ArchNavApi::Impl {
   controller::OperationalController& controller;
   context::VehicleContext& vehicle_context;
-  context::OperationContext& operation_context;
   std::function<void(const report::OperationReport&)> on_complete_callback;
   std::function<void(const report::OperationReport&)> on_progress_callback;
 
   Impl(controller::OperationalController& ctrl,
-       context::VehicleContext& v_ctx,
-       context::OperationContext& o_ctx)
-      : controller(ctrl), vehicle_context(v_ctx), operation_context(o_ctx) {}
+       context::VehicleContext& v_ctx)
+      : controller(ctrl), vehicle_context(v_ctx) {}
 };
 
 ArchNavApi::ArchNavApi(
     controller::OperationalController& controller,
-    context::VehicleContext& vehicle_context,
-    context::OperationContext& operation_context)
-    : impl_(std::make_unique<Impl>(controller, vehicle_context, operation_context)) {}
+    context::VehicleContext& vehicle_context)
+    : impl_(std::make_unique<Impl>(controller, vehicle_context)) {}
 
 ArchNavApi::~ArchNavApi() = default;
 
@@ -74,27 +70,6 @@ constants::CommandResponse ArchNavApi::clear_roi() {
   return impl_->controller.clear_roi();
 }
 
-std::optional<vehicle::GlobalPosition> ArchNavApi::get_roi() const {
-  return impl_->operation_context.get_roi();
-}
-
-void ArchNavApi::set_obstacle_info(
-    std::vector<operation::Obstacle> obstacles) {
-  impl_->controller.set_obstacle_info(std::move(obstacles));
-}
-
-void ArchNavApi::remove_obstacle(const std::string& id) {
-  impl_->controller.remove_obstacle(id);
-}
-
-void ArchNavApi::clear_obstacles() {
-  impl_->controller.clear_obstacles();
-}
-
-std::vector<operation::Obstacle> ArchNavApi::get_obstacles() const {
-  return impl_->operation_context.get_obstacles();
-}
-
 constants::OperationStatus ArchNavApi::operation_status() const {
   return impl_->controller.operation_status();
 }
@@ -125,6 +100,11 @@ void ArchNavApi::on_operation_progress(
     std::function<void(const report::OperationReport&)> callback) {
   impl_->on_progress_callback = callback;
   impl_->controller.set_on_progress_listener(std::move(callback));
+}
+
+void ArchNavApi::on_preemption_event(
+    std::function<void(const controller::PreemptionEvent&)> callback) {
+  impl_->controller.set_on_preemption_event_listener(std::move(callback));
 }
 
 }  // namespace arch_nav

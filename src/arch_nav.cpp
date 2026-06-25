@@ -7,6 +7,8 @@
 #include "arch_nav_core.hpp"
 #include "arch_nav/driver/driver_plugin_loader.hpp"
 #include "arch_nav/driver/driver_registry.hpp"
+#include "arch_nav/supervisor/supervisor_registry.hpp"
+#include "supervisor/supervisor_plugin_loader.hpp"
 
 namespace arch_nav {
 
@@ -49,12 +51,24 @@ std::string resolve_driver_config() {
   return {};
 }
 
+std::string resolve_supervisor_config(const std::string& name) {
+  std::string env_name = "ARCH_NAV_SUPERVISOR_" + name + "_CONFIG";
+  for (auto& c : env_name) c = static_cast<char>(std::toupper(c));
+  const char* env = std::getenv(env_name.c_str());
+  if (env != nullptr && env[0] != '\0') {
+    return std::string(env);
+  }
+  return {};
+}
+
 }  // namespace
 
 struct ArchNav::Impl {
-  platform::DriverPluginLoader           plugin_loader;
+  platform::DriverPluginLoader              plugin_loader;
+  supervisor::SupervisorPluginLoader        supervisor_loader;
   std::unique_ptr<platform::IPlatformDriver> driver;
-  std::unique_ptr<ArchNavCore>                core;
+  std::unique_ptr<ArchNavCore>               core;
+  std::vector<std::unique_ptr<supervisor::ISupervisor>> supervisors;
 };
 
 ArchNav::ArchNav(std::unique_ptr<Impl> impl)
@@ -73,9 +87,18 @@ std::unique_ptr<ArchNav> ArchNav::create(std::chrono::milliseconds context_updat
   impl->core = std::make_unique<ArchNavCore>(
       impl->driver->dispatcher());
 
-  impl->driver->start(impl->core->vehicle_context(),
-                      impl->core->operation_context(),
+  impl->driver->start(impl->core->vehicle_context_writer(),
                       context_update_period);
+
+  impl->supervisor_loader.load_all();
+  auto& supervisor_registry = supervisor::SupervisorRegistry::instance();
+  for (const auto& name : supervisor_registry.registered_names()) {
+    auto config = resolve_supervisor_config(name);
+    auto sv = supervisor_registry.create(name, config);
+    sv->start(impl->core->vehicle_context_reader(),
+              impl->core->supervisor_chain());
+    impl->supervisors.push_back(std::move(sv));
+  }
 
   return std::unique_ptr<ArchNav>(new ArchNav(std::move(impl)));
 }
@@ -85,8 +108,13 @@ ArchNavApi& ArchNav::api() {
 }
 
 ArchNav::~ArchNav() {
-  if (impl_ && impl_->driver) {
-    impl_->driver->stop();
+  if (impl_) {
+    for (auto& sv : impl_->supervisors) {
+      sv->stop();
+    }
+    if (impl_->driver) {
+      impl_->driver->stop();
+    }
   }
 }
 

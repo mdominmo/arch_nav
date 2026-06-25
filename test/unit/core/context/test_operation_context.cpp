@@ -7,29 +7,6 @@ using arch_nav::context::OperationContext;
 using arch_nav::operation::Obstacle;
 using arch_nav::vehicle::GlobalPosition;
 
-TEST(OperationContext, RoiDefaultsToEmpty) {
-  OperationContext ctx;
-  EXPECT_FALSE(ctx.get_roi().has_value());
-}
-
-TEST(OperationContext, UpdateRoiStoresValue) {
-  OperationContext ctx;
-  GlobalPosition roi{40.0, -3.0, 100.0};
-  ctx.update_roi(roi);
-  auto stored = ctx.get_roi();
-  ASSERT_TRUE(stored.has_value());
-  EXPECT_DOUBLE_EQ(stored->lat, 40.0);
-  EXPECT_DOUBLE_EQ(stored->lon, -3.0);
-  EXPECT_DOUBLE_EQ(stored->alt, 100.0);
-}
-
-TEST(OperationContext, ClearRoiResetsToEmpty) {
-  OperationContext ctx;
-  ctx.update_roi(GlobalPosition{40.0, -3.0, 100.0});
-  ctx.clear_roi();
-  EXPECT_FALSE(ctx.get_roi().has_value());
-}
-
 TEST(OperationContext, ObstaclesDefaultToEmpty) {
   OperationContext ctx;
   EXPECT_TRUE(ctx.get_obstacles().empty());

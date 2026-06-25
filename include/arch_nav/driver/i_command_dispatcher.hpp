@@ -6,8 +6,9 @@
 
 #include "arch_nav/constants/command_response.hpp"
 #include "arch_nav/constants/reference_frame.hpp"
-#include "arch_nav/model/report/takeoff_driver_operation_data.hpp"
-#include "arch_nav/model/report/waypoint_driver_operation_data.hpp"
+#include "arch_nav/execution/takeoff_execution_state.hpp"
+#include "arch_nav/execution/waypoint_execution_state.hpp"
+#include "arch_nav/execution/trajectory_execution_state.hpp"
 #include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
@@ -19,7 +20,7 @@ class ICommandDispatcher {
   virtual constants::CommandResponse execute_takeoff(
       double, constants::ReferenceFrame,
       std::function<void()>,
-      report::TakeoffDriverOperationData&) {
+      execution::TakeoffExecutionState&) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
@@ -38,14 +39,15 @@ class ICommandDispatcher {
       std::vector<vehicle::Waypoint>,
       constants::ReferenceFrame,
       std::function<void()>,
-      report::WaypointDriverOperationData&) {
+      execution::WaypointExecutionState&) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 
   virtual constants::CommandResponse execute_trajectory(
       std::vector<vehicle::TrajectoryPoint>,
       constants::ReferenceFrame,
-      std::function<void()>) {
+      std::function<void()>,
+      execution::TrajectoryExecutionState&) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 

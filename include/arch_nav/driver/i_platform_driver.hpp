@@ -3,12 +3,8 @@
 
 #include <chrono>
 
+#include "arch_nav/context/i_vehicle_context_writer.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
-
-namespace arch_nav::context {
-class VehicleContext;
-class OperationContext;
-}
 
 namespace arch_nav::platform {
 
@@ -18,8 +14,7 @@ class IPlatformDriver {
 
   virtual ICommandDispatcher& dispatcher() = 0;
 
-  virtual void start(context::VehicleContext& vehicle_context,
-                     context::OperationContext& operation_context,
+  virtual void start(context::IVehicleContextWriter& vehicle_context_writer,
                      std::chrono::milliseconds update_period) = 0;
 
   virtual void stop() = 0;

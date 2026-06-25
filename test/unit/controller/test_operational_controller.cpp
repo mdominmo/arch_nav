@@ -12,12 +12,17 @@
 #include "arch_nav/context/vehicle_context.hpp"
 #include "arch_nav/context/operation_context.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
+#include "arch_nav/execution/takeoff_execution_state.hpp"
+#include "arch_nav/execution/waypoint_execution_state.hpp"
+#include "arch_nav/execution/trajectory_execution_state.hpp"
 #include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/report/operation_report.hpp"
-#include "arch_nav/model/report/takeoff_driver_operation_data.hpp"
-#include "arch_nav/model/report/waypoint_driver_operation_data.hpp"
+#include "arch_nav/model/vehicle/trajectory_point.hpp"
 #include "arch_nav/model/vehicle/vehicle_status.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
+#include "arch_nav/controller/preemption_event.hpp"
+#include "arch_nav/controller/preemption_info.hpp"
+#include "arch_nav/controller/preemption_type.hpp"
 #include "controller/operational_controller.hpp"
 
 using namespace arch_nav::constants;
@@ -26,6 +31,7 @@ using namespace arch_nav::controller;
 using namespace arch_nav::platform;
 using namespace arch_nav::report;
 using arch_nav::vehicle::GlobalPosition;
+using arch_nav::vehicle::TrajectoryPoint;
 using arch_nav::vehicle::VehicleStatus;
 using arch_nav::vehicle::Waypoint;
 
@@ -34,11 +40,16 @@ using arch_nav::vehicle::Waypoint;
 // ─────────────────────────────────────────────────────────────────────────────
 
 struct MockDispatcher : public ICommandDispatcher {
-  bool accept_takeoff    = false;
-  bool accept_land       = false;
-  bool accept_change_yaw = false;
-  bool accept_set_roi    = false;
+  bool accept_takeoff     = false;
+  bool accept_land        = false;
+  bool accept_change_yaw  = false;
+  bool accept_waypoints   = false;
+  bool accept_trajectory  = false;
+  bool accept_set_roi     = false;
   std::function<void()> stored_complete;
+
+  arch_nav::execution::WaypointExecutionState*   last_waypoint_state{nullptr};
+  arch_nav::execution::TrajectoryExecutionState* last_trajectory_state{nullptr};
 
   CommandResponse execute_arm()    override { return CommandResponse::ACCEPTED; }
   CommandResponse execute_disarm() override { return CommandResponse::ACCEPTED; }
@@ -53,7 +64,7 @@ struct MockDispatcher : public ICommandDispatcher {
   CommandResponse execute_takeoff(
       double, ReferenceFrame,
       std::function<void()> on_complete,
-      TakeoffDriverOperationData&) override {
+      arch_nav::execution::TakeoffExecutionState&) override {
     if (!accept_takeoff) return CommandResponse::NOT_SUPPORTED;
     stored_complete = std::move(on_complete);
     return CommandResponse::ACCEPTED;
@@ -73,7 +84,26 @@ struct MockDispatcher : public ICommandDispatcher {
     return CommandResponse::ACCEPTED;
   }
 
-  // Simulates the driver signalling operation completion
+  CommandResponse execute_waypoint_following(
+      std::vector<Waypoint>, ReferenceFrame,
+      std::function<void()> on_complete,
+      arch_nav::execution::WaypointExecutionState& state) override {
+    if (!accept_waypoints) return CommandResponse::NOT_SUPPORTED;
+    last_waypoint_state = &state;
+    stored_complete = std::move(on_complete);
+    return CommandResponse::ACCEPTED;
+  }
+
+  CommandResponse execute_trajectory(
+      std::vector<TrajectoryPoint>, ReferenceFrame,
+      std::function<void()> on_complete,
+      arch_nav::execution::TrajectoryExecutionState& state) override {
+    if (!accept_trajectory) return CommandResponse::NOT_SUPPORTED;
+    last_trajectory_state = &state;
+    stored_complete = std::move(on_complete);
+    return CommandResponse::ACCEPTED;
+  }
+
   void complete() { if (stored_complete) stored_complete(); }
 };
 
@@ -92,6 +122,18 @@ static VehicleStatus external_control() {
 }
 static VehicleStatus unknown_status() {
   return VehicleStatus{ControlState::UNKNOWN, ArmState::UNKNOWN};
+}
+
+static std::vector<Waypoint> sample_waypoints() {
+  return {{40.0, -3.0, 10.0}, {40.1, -3.1, 15.0}, {40.2, -3.2, 20.0}};
+}
+
+static std::vector<TrajectoryPoint> sample_trajectory() {
+  return {
+    {0.0, 0,0,0, 0,0,0, 0,0,0, 0.0, 0.0},
+    {1.0, 1,0,0, 1,0,0, 0,0,0, 0.0, 0.0},
+    {2.0, 2,0,0, 0,0,0, 0,0,0, 0.0, 0.0},
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -489,4 +531,251 @@ TEST_F(OperationalControllerTest, ClearRoi_DeniedInRunning) {
   ctrl_.takeoff(10.0, ReferenceFrame::GLOBAL_WGS84);
 
   EXPECT_EQ(ctrl_.clear_roi(), CommandResponse::DENIED);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preemption / Memento — Waypoint
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, Preempt_WaypointTransientResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_waypoints = true;
+  ctrl_.waypoint_following(sample_waypoints(), ReferenceFrame::GLOBAL_WGS84);
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+
+  dispatcher_.accept_waypoints = true;
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+TEST_F(OperationalControllerTest, Preempt_WaypointTerminalDoesNotResume) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_waypoints = true;
+  ctrl_.waypoint_following(sample_waypoints(), ReferenceFrame::GLOBAL_WGS84);
+
+  ctrl_.preempt(PreemptionType::TERMINAL,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preemption / Memento — Trajectory
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, Preempt_TrajectoryTransientResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_trajectory = true;
+  ctrl_.trajectory_execution(sample_trajectory(), ReferenceFrame::LOCAL_NED);
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+
+  dispatcher_.accept_trajectory = true;
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+TEST_F(OperationalControllerTest, Preempt_TrajectoryTerminalDoesNotResume) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_trajectory = true;
+  ctrl_.trajectory_execution(sample_trajectory(), ReferenceFrame::LOCAL_NED);
+
+  ctrl_.preempt(PreemptionType::TERMINAL,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preemption / Memento — Takeoff
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, Preempt_TakeoffTransientResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(10.0, ReferenceFrame::LOCAL_NED);
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+
+  dispatcher_.accept_takeoff = true;
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preemption / Memento — Land
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, Preempt_LandTransientResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(5.0, ReferenceFrame::LOCAL_NED);
+
+  dispatcher_.accept_land = true;
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Preemption / Memento — ChangeYaw
+// ─────────────────────────────────────────────────────────────────────────────
+
+TEST_F(OperationalControllerTest, Preempt_ChangeYawTransientResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_change_yaw = true;
+  ctrl_.change_yaw(1.5, ReferenceFrame::LOCAL_NED);
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+
+  dispatcher_.accept_change_yaw = true;
+  dispatcher_.complete();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Supervisor Events
+// ─────────────────────────────────────────────────────────────────────────────
+
+using arch_nav::controller::PreemptionEvent;
+using arch_nav::controller::PreemptionEventType;
+
+TEST_F(OperationalControllerTest, PreemptionEvent_ActivatedFiredOnPreempt) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(10.0, ReferenceFrame::LOCAL_NED);
+
+  std::vector<PreemptionEvent> events;
+  ctrl_.set_on_preemption_event_listener([&](const PreemptionEvent& e) {
+    events.push_back(e);
+  });
+
+  ctrl_.preempt(PreemptionType::TERMINAL,
+                {"geofence", "boundary violation", "{\"zone\":1}"});
+
+  ASSERT_EQ(events.size(), 1u);
+  EXPECT_EQ(events[0].event_type, PreemptionEventType::ACTIVATED);
+  EXPECT_EQ(events[0].name, "geofence");
+  EXPECT_EQ(events[0].reason, "boundary violation");
+  EXPECT_EQ(events[0].preemption_type, PreemptionType::TERMINAL);
+  EXPECT_EQ(events[0].details, "{\"zone\":1}");
+}
+
+TEST_F(OperationalControllerTest, PreemptionEvent_ResolvedFiredOnTransientComplete) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_waypoints = true;
+  ctrl_.waypoint_following(sample_waypoints(), ReferenceFrame::GLOBAL_WGS84);
+
+  std::vector<PreemptionEvent> events;
+  ctrl_.set_on_preemption_event_listener([&](const PreemptionEvent& e) {
+    events.push_back(e);
+  });
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+                {"battery", "low battery", ""});
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+
+  dispatcher_.accept_waypoints = true;
+  dispatcher_.complete();
+
+  ASSERT_EQ(events.size(), 2u);
+  EXPECT_EQ(events[0].event_type, PreemptionEventType::ACTIVATED);
+  EXPECT_EQ(events[1].event_type, PreemptionEventType::RESOLVED);
+  EXPECT_EQ(events[1].name, "battery");
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+TEST_F(OperationalControllerTest, PreemptionEvent_ResolvedFiredOnTerminalComplete) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(10.0, ReferenceFrame::LOCAL_NED);
+
+  std::vector<PreemptionEvent> events;
+  ctrl_.set_on_preemption_event_listener([&](const PreemptionEvent& e) {
+    events.push_back(e);
+  });
+
+  ctrl_.preempt(PreemptionType::TERMINAL,
+                {"geofence", "boundary violation", ""});
+
+  dispatcher_.accept_land = true;
+  ctrl_.land();
+  dispatcher_.complete();
+
+  ASSERT_EQ(events.size(), 2u);
+  EXPECT_EQ(events[0].event_type, PreemptionEventType::ACTIVATED);
+  EXPECT_EQ(events[1].event_type, PreemptionEventType::RESOLVED);
+  EXPECT_EQ(events[1].name, "geofence");
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+}
+
+TEST_F(OperationalControllerTest, PreemptionEvent_ResolvedOnVehicleStatusLoss) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_takeoff = true;
+  ctrl_.takeoff(10.0, ReferenceFrame::LOCAL_NED);
+
+  std::vector<PreemptionEvent> events;
+  ctrl_.set_on_preemption_event_listener([&](const PreemptionEvent& e) {
+    events.push_back(e);
+  });
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+                {"battery", "low battery", ""});
+
+  context_.update(external_control());
+
+  ASSERT_EQ(events.size(), 2u);
+  EXPECT_EQ(events[0].event_type, PreemptionEventType::ACTIVATED);
+  EXPECT_EQ(events[1].event_type, PreemptionEventType::RESOLVED);
+  EXPECT_EQ(events[1].name, "battery");
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::HANDOVER);
 }

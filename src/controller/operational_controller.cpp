@@ -2,16 +2,17 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 
 #include "commands/arm_command.hpp"
 #include "commands/clear_roi_command.hpp"
 #include "commands/disarm_command.hpp"
 #include "commands/set_roi_command.hpp"
-#include "context_updates/set_obstacle_info.hpp"
 #include "states/disarmed_state.hpp"
 #include "states/handover_state.hpp"
 #include "states/idle_state.hpp"
 #include "states/running_state.hpp"
+#include "states/preempted_state.hpp"
 #include "tasks/land_task.hpp"
 #include "tasks/change_yaw_task.hpp"
 #include "tasks/takeoff_task.hpp"
@@ -21,21 +22,13 @@
 namespace arch_nav::controller {
 
 OperationalController::OperationalController(
-    context::VehicleContext& vehicle_context,
-    context::OperationContext& operation_context,
     platform::ICommandDispatcher& dispatcher)
-    : vehicle_context_(vehicle_context),
-      operation_context_(operation_context),
-      dispatcher_(dispatcher),
+    : dispatcher_(dispatcher),
       current_state_(nullptr),
       current_status_(constants::OperationStatus::HANDOVER) {
   change_state(
       std::make_unique<HandoverState>(),
       constants::OperationStatus::HANDOVER);
-  vehicle_context_.subscribe_vehicle_status(
-      [this](const vehicle::VehicleStatus& status) {
-        on_vehicle_status_update(status);
-      });
 }
 
 OperationalController::~OperationalController() {
@@ -97,28 +90,13 @@ constants::CommandResponse OperationalController::set_roi(
     vehicle::GlobalPosition position, constants::ReferenceFrame frame) {
   std::lock_guard<std::mutex> lock(mutex_);
   return current_state_->try_command(
-      *this, std::make_unique<SetRoiCommand>(
-          std::move(position), frame, operation_context_));
+      *this, std::make_unique<SetRoiCommand>(std::move(position), frame));
 }
 
 constants::CommandResponse OperationalController::clear_roi() {
   std::lock_guard<std::mutex> lock(mutex_);
   return current_state_->try_command(
-      *this, std::make_unique<ClearRoiCommand>(operation_context_));
-}
-
-void OperationalController::set_obstacle_info(
-    std::vector<operation::Obstacle> obstacles) {
-  auto update = std::make_unique<SetObstacleInfo>(std::move(obstacles));
-  update->apply(operation_context_);
-}
-
-void OperationalController::remove_obstacle(const std::string& id) {
-  operation_context_.remove_obstacle(id);
-}
-
-void OperationalController::clear_obstacles() {
-  operation_context_.clear_obstacles();
+      *this, std::make_unique<ClearRoiCommand>());
 }
 
 constants::OperationStatus OperationalController::operation_status() const {
@@ -147,6 +125,12 @@ void OperationalController::set_on_progress_listener(
     std::function<void(const report::OperationReport&)> cb) {
   std::lock_guard<std::mutex> lock(mutex_);
   on_progress_listener_ = std::move(cb);
+}
+
+void OperationalController::set_on_preemption_event_listener(
+    std::function<void(const PreemptionEvent&)> cb) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  on_preemption_event_listener_ = std::move(cb);
 }
 
 void OperationalController::start_progress_thread() {
@@ -184,6 +168,44 @@ void OperationalController::on_operation_complete() {
   }
 
   if (listener && report) listener(*report);
+}
+
+void OperationalController::preempt(PreemptionType type,
+                                     const PreemptionInfo& info) {
+  std::function<void(const PreemptionEvent&)> listener;
+  std::optional<PreemptionEvent> displaced_event;
+  PreemptionEvent activated_event;
+  bool accepted = false;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    auto result = current_state_->try_preempt(*this);
+    if (result.accepted) {
+      displaced_event = std::move(result.displaced_preemption_event);
+
+      change_state(
+          std::make_unique<PreemptedState>(
+              std::move(result.memento), std::move(result.user_report),
+              type, info),
+          constants::OperationStatus::SUPERVISED);
+      listener = on_preemption_event_listener_;
+      activated_event = {
+          PreemptionEventType::ACTIVATED,
+          info.name, info.reason, type, info.details};
+      accepted = true;
+    }
+  }
+  if (accepted && listener) {
+    if (displaced_event) listener(*displaced_event);
+    listener(activated_event);
+  }
+}
+
+void OperationalController::on_supervisor_task_complete() {
+  auto* preempted = dynamic_cast<PreemptedState*>(current_state_.get());
+  if (preempted) {
+    preempted->on_supervisor_task_complete(*this);
+  }
 }
 
 void OperationalController::change_state(

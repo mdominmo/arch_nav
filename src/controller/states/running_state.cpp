@@ -59,4 +59,15 @@ void OperationalController::RunningState::on_vehicle_status_update(
   if (listener && report) listener(*report);
 }
 
+OperationalController::State::PreemptionResult
+OperationalController::RunningState::try_preempt(OperationalController& ctx) {
+  ctx.stop_progress_thread();
+
+  auto memento = task_->make_memento();
+  auto user_report = ctx.last_report_;
+  task_->abort();
+
+  return {std::move(memento), std::move(user_report), true};
+}
+
 }  // namespace arch_nav::controller

@@ -2,6 +2,7 @@
 #define ARCH_NAV__CORE__CONTROLLER__CHANGE_YAW_TASK_HPP_
 
 #include "controller/navigation_task.hpp"
+#include "arch_nav/constants/reference_frame.hpp"
 
 namespace arch_nav::controller {
 
@@ -10,13 +11,13 @@ class ChangeYawTask : public NavigationTask {
   ChangeYawTask(double new_yaw, constants::ReferenceFrame frame);
 
   constants::CommandResponse start(
-    context::VehicleContext& context,
     platform::ICommandDispatcher& dispatcher,
     std::function<void()> on_complete) override;
 
   void abort() override;
 
   std::shared_ptr<report::OperationReport> make_report() override;
+  std::unique_ptr<NavigationTaskMemento> make_memento() const override;
 
  private:
   double new_yaw_;

@@ -33,7 +33,6 @@ constants::CommandResponse OperationalController::IdleState::try_execute(
     OperationalController& ctx, std::unique_ptr<NavigationTask> task) {
   auto report = task->make_report();
   auto response = task->start(
-      ctx.vehicle_context_,
       ctx.dispatcher_,
       [&ctx]() { ctx.on_operation_complete(); });
 

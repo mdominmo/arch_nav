@@ -8,13 +8,13 @@ namespace arch_nav::controller {
 class LandTask : public NavigationTask {
  public:
   constants::CommandResponse start(
-      context::VehicleContext& context,
       platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
 
   std::shared_ptr<report::OperationReport> make_report() override;
+  std::unique_ptr<NavigationTaskMemento> make_memento() const override;
 
  private:
   platform::ICommandDispatcher* dispatcher_{nullptr};

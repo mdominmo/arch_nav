@@ -1,18 +1,25 @@
 #ifndef ARCH_NAV_MODEL_REPORT_WAYPOINT_REPORT_HPP_
 #define ARCH_NAV_MODEL_REPORT_WAYPOINT_REPORT_HPP_
 
+#include <memory>
+
 #include "arch_nav/model/report/operation_report.hpp"
-#include "arch_nav/model/report/waypoint_driver_operation_data.hpp"
+#include "arch_nav/execution/waypoint_execution_state.hpp"
 
 namespace arch_nav::report {
 
 class WaypointReport : public OperationReport {
  public:
-  WaypointDriverOperationData& driver_data() { return driver_data_; }
-  const WaypointDriverOperationData& driver_data() const { return driver_data_; }
+  explicit WaypointReport(
+      std::shared_ptr<const execution::WaypointExecutionState> state)
+      : state_(std::move(state)) {}
+
+  const execution::WaypointExecutionState& execution_state() const {
+    return *state_;
+  }
 
  private:
-  WaypointDriverOperationData driver_data_;
+  std::shared_ptr<const execution::WaypointExecutionState> state_;
 };
 
 }  // namespace arch_nav::report

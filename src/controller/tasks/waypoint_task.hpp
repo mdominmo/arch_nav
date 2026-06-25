@@ -7,6 +7,7 @@
 
 #include "controller/navigation_task.hpp"
 #include "arch_nav/constants/reference_frame.hpp"
+#include "arch_nav/execution/waypoint_execution_state.hpp"
 #include "arch_nav/model/report/waypoint_report.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 
@@ -18,19 +19,19 @@ class WaypointTask : public NavigationTask {
                constants::ReferenceFrame frame);
 
   constants::CommandResponse start(
-      context::VehicleContext& context,
       platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
 
   std::shared_ptr<report::OperationReport> make_report() override;
+  std::unique_ptr<NavigationTaskMemento> make_memento() const override;
 
  private:
-  std::vector<vehicle::Waypoint>          waypoints_;
-  constants::ReferenceFrame               frame_;
-  std::shared_ptr<report::WaypointReport> report_;
-  platform::ICommandDispatcher*        dispatcher_{nullptr};
+  std::vector<vehicle::Waypoint>                       waypoints_;
+  constants::ReferenceFrame                            frame_;
+  std::shared_ptr<execution::WaypointExecutionState>   state_;
+  platform::ICommandDispatcher*                        dispatcher_{nullptr};
 };
 
 }  // namespace arch_nav::controller

@@ -1,30 +1,10 @@
 #include "arch_nav/context/operation_context.hpp"
 
-#include <shared_mutex>
 #include <mutex>
 
 namespace arch_nav::context {
 
-using std::shared_lock;
-using std::shared_mutex;
-using std::unique_lock;
-
 OperationContext::OperationContext() = default;
-
-std::optional<vehicle::GlobalPosition> OperationContext::get_roi() const {
-  shared_lock<shared_mutex> lock(roi_mutex_);
-  return roi_;
-}
-
-void OperationContext::update_roi(const vehicle::GlobalPosition& roi) {
-  unique_lock<shared_mutex> lock(roi_mutex_);
-  roi_ = roi;
-}
-
-void OperationContext::clear_roi() {
-  unique_lock<shared_mutex> lock(roi_mutex_);
-  roi_.reset();
-}
 
 std::vector<operation::Obstacle> OperationContext::get_obstacles() const {
   std::lock_guard<std::mutex> lock(obstacles_mutex_);

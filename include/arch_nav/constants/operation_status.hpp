@@ -9,8 +9,9 @@ enum class OperationStatus : int32_t {
   HANDOVER = -2,
   DISARMED = -1,
   IDLE     =  0,
-  RUNNING  =  1,
-  FAILED   =  2
+  RUNNING    =  1,
+  FAILED     =  2,
+  SUPERVISED =  3
 };
 
 }  // namespace arch_nav::constants

@@ -15,6 +15,7 @@ struct OperationalController::RunningState : OperationalController::State {
       OperationalController& ctx,
       const vehicle::VehicleStatus& status) override;
   void try_stop(OperationalController& ctx) override;
+  PreemptionResult try_preempt(OperationalController& ctx) override;
 
  private:
   std::unique_ptr<NavigationTask> task_;
