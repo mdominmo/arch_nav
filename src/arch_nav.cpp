@@ -96,6 +96,7 @@ std::unique_ptr<ArchNav> ArchNav::create(std::chrono::milliseconds context_updat
     auto config = resolve_supervisor_config(name);
     auto sv = supervisor_registry.create(name, config);
     sv->start(impl->core->vehicle_context_reader(),
+              impl->core->operation_context_reader(),
               impl->core->supervisor_chain());
     impl->supervisors.push_back(std::move(sv));
   }

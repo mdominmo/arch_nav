@@ -12,6 +12,7 @@
 #include "arch_nav/model/vehicle/global_position.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
 #include "arch_nav/model/vehicle/trajectory_point.hpp"
+#include "arch_nav/descriptor/follow_target_operation_descriptor.hpp"
 
 namespace arch_nav::platform {
 
@@ -65,6 +66,13 @@ class ICommandDispatcher {
   }
 
   virtual constants::CommandResponse execute_clear_roi() {
+    return constants::CommandResponse::NOT_SUPPORTED;
+  }
+
+  virtual constants::CommandResponse execute_follow_target(
+      constants::ReferenceFrame,
+      std::function<void()>,
+      descriptor::FollowTargetOperationDescriptor&) {
     return constants::CommandResponse::NOT_SUPPORTED;
   }
 

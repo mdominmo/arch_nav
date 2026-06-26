@@ -3,7 +3,7 @@
 
 namespace arch_nav::report {
 
-enum class ReportStatus { IN_PROGRESS, COMPLETED, ABORTED, FAILED };
+enum class ReportStatus { IN_PROGRESS, COMPLETED, ABORTED, FAILED, SUPERVISED };
 
 class OperationReport {
  public:

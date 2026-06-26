@@ -1,13 +1,10 @@
 #ifndef ARCH_NAV_CONTEXT_OPERATION_CONTEXT_HPP_
 #define ARCH_NAV_CONTEXT_OPERATION_CONTEXT_HPP_
 
-#include <functional>
+#include <memory>
 #include <mutex>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
-#include "arch_nav/model/operation/obstacle.hpp"
+#include "arch_nav/descriptor/operation_descriptor.hpp"
 
 namespace arch_nav::context {
 
@@ -15,21 +12,15 @@ class OperationContext {
  public:
   OperationContext();
 
-  std::vector<operation::Obstacle> get_obstacles() const;
-  void set_obstacle(const operation::Obstacle& obstacle);
-  void remove_obstacle(const std::string& id);
-  void clear_obstacles();
-
-  void subscribe_obstacles(
-      std::function<void(const std::vector<operation::Obstacle>&)> callback);
+  std::shared_ptr<descriptor::OperationDescriptor> current_descriptor() const;
+  void set_current_descriptor(
+      std::shared_ptr<descriptor::OperationDescriptor> desc);
+  void clear_current_descriptor();
+  std::unique_ptr<descriptor::OperationDescriptor> snapshot_descriptor() const;
 
  private:
-  void publish_obstacles();
-
-  mutable std::mutex obstacles_mutex_;
-  std::unordered_map<std::string, operation::Obstacle> obstacles_;
-  std::vector<std::function<void(const std::vector<operation::Obstacle>&)>>
-      obstacles_subscribers_;
+  mutable std::mutex descriptor_mutex_;
+  std::shared_ptr<descriptor::OperationDescriptor> current_descriptor_;
 };
 
 }  // namespace arch_nav::context

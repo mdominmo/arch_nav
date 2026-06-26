@@ -12,7 +12,8 @@ namespace arch_nav::supervisor {
 
 class SupervisorChain {
  public:
-  explicit SupervisorChain(controller::IOperationalController& controller);
+  SupervisorChain(controller::IOperationalController& controller,
+                  context::IOperationContextWriter& operation_writer);
 
   void register_supervisor(ISupervisor& supervisor, int priority,
                            controller::PreemptionType type);
@@ -29,6 +30,7 @@ class SupervisorChain {
   };
 
   controller::IOperationalController& controller_;
+  context::IOperationContextWriter& operation_writer_;
 
   mutable std::mutex mutex_;
   std::vector<RegisteredSupervisor> supervisors_;

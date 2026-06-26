@@ -7,7 +7,6 @@
 #include "arch_nav/constants/command_response.hpp"
 #include "arch_nav/model/report/operation_report.hpp"
 #include "arch_nav/driver/i_command_dispatcher.hpp"
-#include "controller/navigation_task_memento.hpp"
 
 namespace arch_nav::controller {
 
@@ -19,11 +18,7 @@ class NavigationTask {
 
   virtual void abort() = 0;
 
-  virtual std::shared_ptr<report::OperationReport> make_report() = 0;
-
-  virtual std::unique_ptr<NavigationTaskMemento> make_memento() const {
-    return nullptr;
-  }
+  virtual std::shared_ptr<report::OperationReport> make_report() const = 0;
 
   virtual ~NavigationTask() = default;
 };

@@ -33,6 +33,10 @@ class IOperationalController {
   virtual constants::CommandResponse trajectory_execution(
       std::vector<vehicle::TrajectoryPoint> trajectory,
       constants::ReferenceFrame frame) = 0;
+  virtual constants::CommandResponse follow_target(
+      constants::ReferenceFrame frame) = 0;
+  virtual void update_follow_target_position(
+      double x, double y, double z) = 0;
   virtual void stop() = 0;
 
   virtual constants::CommandResponse arm() = 0;

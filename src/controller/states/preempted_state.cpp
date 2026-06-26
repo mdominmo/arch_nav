@@ -10,15 +10,16 @@
 #include "arch_nav/constants/operation_status.hpp"
 #include "arch_nav/constants/vehicle_status_states.hpp"
 #include "arch_nav/controller/preemption_event.hpp"
+#include "controller/navigation_task_factory.hpp"
 
 namespace arch_nav::controller {
 
 OperationalController::PreemptedState::PreemptedState(
-    std::unique_ptr<NavigationTaskMemento> memento,
+    std::shared_ptr<descriptor::OperationDescriptor> user_descriptor,
     std::shared_ptr<report::OperationReport> user_report,
     PreemptionType preemption_type,
     PreemptionInfo preemption_info)
-    : memento_(std::move(memento)),
+    : user_descriptor_(std::move(user_descriptor)),
       user_report_(std::move(user_report)),
       preemption_type_(preemption_type),
       preemption_info_(std::move(preemption_info)) {}
@@ -58,7 +59,7 @@ OperationalController::PreemptedState::try_preempt(OperationalController& ctx) {
     supervisor_task_.reset();
   }
 
-  return {std::move(memento_), std::move(user_report_), true,
+  return {std::move(user_descriptor_), std::move(user_report_), true,
           PreemptionEvent{
               PreemptionEventType::RESOLVED,
               preemption_info_.name, preemption_info_.reason,
@@ -76,8 +77,12 @@ void OperationalController::PreemptedState::on_supervisor_task_complete(
       preemption_info_.name, preemption_info_.reason,
       preemption_type_, preemption_info_.details};
 
-  if (preemption_type_ == PreemptionType::TRANSIENT && memento_) {
-    auto restored_task = memento_->reconstruct();
+  if (preemption_type_ == PreemptionType::TRANSIENT && user_descriptor_) {
+    user_descriptor_->set_lifecycle_status(report::ReportStatus::IN_PROGRESS);
+    ctx.operation_context_.set_current_descriptor(user_descriptor_);
+
+    auto restored_task =
+        NavigationTaskFactory::create_from_descriptor(*user_descriptor_);
     if (restored_task) {
       ctx.last_report_ = restored_task->make_report();
 
@@ -104,6 +109,10 @@ void OperationalController::PreemptedState::on_supervisor_task_complete(
   if (preemption_type_ == PreemptionType::TERMINAL && report) {
     report->abort();
   }
+
+  if (user_descriptor_)
+    user_descriptor_->set_lifecycle_status(report::ReportStatus::ABORTED);
+  ctx.operation_context_.clear_current_descriptor();
 
   ctx.change_state(
       std::make_unique<IdleState>(),
@@ -132,6 +141,10 @@ void OperationalController::PreemptedState::on_vehicle_status_update(
   auto report = user_report_;
   auto listener = ctx.on_complete_listener_;
   if (report) report->abort();
+
+  if (user_descriptor_)
+    user_descriptor_->set_lifecycle_status(report::ReportStatus::ABORTED);
+  ctx.operation_context_.clear_current_descriptor();
 
   if (!status.is_valid() ||
       status.control_state != constants::ControlState::KERNEL_CONTROLLED) {

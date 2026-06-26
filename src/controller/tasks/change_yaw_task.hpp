@@ -2,26 +2,24 @@
 #define ARCH_NAV__CORE__CONTROLLER__CHANGE_YAW_TASK_HPP_
 
 #include "controller/navigation_task.hpp"
-#include "arch_nav/constants/reference_frame.hpp"
+#include "arch_nav/descriptor/change_yaw_operation_descriptor.hpp"
 
 namespace arch_nav::controller {
 
 class ChangeYawTask : public NavigationTask {
  public:
-  ChangeYawTask(double new_yaw, constants::ReferenceFrame frame);
+  explicit ChangeYawTask(
+      descriptor::ChangeYawOperationDescriptor& descriptor);
 
   constants::CommandResponse start(
-    platform::ICommandDispatcher& dispatcher,
-    std::function<void()> on_complete) override;
+      platform::ICommandDispatcher& dispatcher,
+      std::function<void()> on_complete) override;
 
   void abort() override;
-
-  std::shared_ptr<report::OperationReport> make_report() override;
-  std::unique_ptr<NavigationTaskMemento> make_memento() const override;
+  std::shared_ptr<report::OperationReport> make_report() const override;
 
  private:
-  double new_yaw_;
-  constants::ReferenceFrame frame_;
+  descriptor::ChangeYawOperationDescriptor& descriptor_;
   platform::ICommandDispatcher* dispatcher_{nullptr};
 };
 

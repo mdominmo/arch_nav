@@ -11,13 +11,9 @@ class OperationContextReaderProxy final : public IOperationContextReader {
   explicit OperationContextReaderProxy(OperationContext& context)
       : context_(context) {}
 
-  std::vector<operation::Obstacle> get_obstacles() const override {
-    return context_.get_obstacles();
-  }
-
-  void subscribe_obstacles(
-      std::function<void(const std::vector<operation::Obstacle>&)> callback) override {
-    context_.subscribe_obstacles(std::move(callback));
+  std::shared_ptr<const descriptor::OperationDescriptor>
+      current_descriptor() const override {
+    return context_.current_descriptor();
   }
 
  private:

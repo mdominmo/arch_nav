@@ -2,8 +2,11 @@
 
 namespace arch_nav::supervisor {
 
-SupervisorChain::SupervisorChain(controller::IOperationalController& controller)
-    : controller_(controller) {}
+SupervisorChain::SupervisorChain(
+    controller::IOperationalController& controller,
+    context::IOperationContextWriter& operation_writer)
+    : controller_(controller),
+      operation_writer_(operation_writer) {}
 
 void SupervisorChain::register_supervisor(ISupervisor& supervisor, int priority,
                                           controller::PreemptionType type) {
@@ -34,7 +37,7 @@ void SupervisorChain::request_control(ISupervisor& requester,
   active_priority_ = entry->priority;
   active_type_ = entry->type;
 
-  requester.execute(controller_);
+  requester.execute(controller_, operation_writer_);
 }
 
 void SupervisorChain::release_control(ISupervisor& requester) {

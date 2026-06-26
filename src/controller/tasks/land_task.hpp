@@ -2,21 +2,23 @@
 #define ARCH_NAV__CORE__CONTROLLER__LAND_TASK_HPP_
 
 #include "controller/navigation_task.hpp"
+#include "arch_nav/descriptor/land_operation_descriptor.hpp"
 
 namespace arch_nav::controller {
 
 class LandTask : public NavigationTask {
  public:
+  explicit LandTask(descriptor::LandOperationDescriptor& descriptor);
+
   constants::CommandResponse start(
       platform::ICommandDispatcher& dispatcher,
       std::function<void()> on_complete) override;
 
   void abort() override;
-
-  std::shared_ptr<report::OperationReport> make_report() override;
-  std::unique_ptr<NavigationTaskMemento> make_memento() const override;
+  std::shared_ptr<report::OperationReport> make_report() const override;
 
  private:
+  descriptor::LandOperationDescriptor& descriptor_;
   platform::ICommandDispatcher* dispatcher_{nullptr};
 };
 

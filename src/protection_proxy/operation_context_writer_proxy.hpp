@@ -11,16 +11,13 @@ class OperationContextWriterProxy final : public IOperationContextWriter {
   explicit OperationContextWriterProxy(OperationContext& context)
       : context_(context) {}
 
-  void set_obstacle(const operation::Obstacle& obstacle) override {
-    context_.set_obstacle(obstacle);
+  void set_current_descriptor(
+      std::shared_ptr<descriptor::OperationDescriptor> desc) override {
+    context_.set_current_descriptor(std::move(desc));
   }
 
-  void remove_obstacle(const std::string& id) override {
-    context_.remove_obstacle(id);
-  }
-
-  void clear_obstacles() override {
-    context_.clear_obstacles();
+  void clear_current_descriptor() override {
+    context_.clear_current_descriptor();
   }
 
  private:

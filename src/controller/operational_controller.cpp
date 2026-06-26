@@ -19,11 +19,21 @@
 #include "tasks/waypoint_task.hpp"
 #include "tasks/trajectory_execution_task.hpp"
 
+#include "arch_nav/descriptor/waypoint_operation_descriptor.hpp"
+#include "arch_nav/descriptor/takeoff_operation_descriptor.hpp"
+#include "arch_nav/descriptor/trajectory_operation_descriptor.hpp"
+#include "arch_nav/descriptor/land_operation_descriptor.hpp"
+#include "arch_nav/descriptor/change_yaw_operation_descriptor.hpp"
+#include "arch_nav/descriptor/follow_target_operation_descriptor.hpp"
+#include "tasks/follow_target_task.hpp"
+
 namespace arch_nav::controller {
 
 OperationalController::OperationalController(
+    context::OperationContext& operation_context,
     platform::ICommandDispatcher& dispatcher)
-    : dispatcher_(dispatcher),
+    : operation_context_(operation_context),
+      dispatcher_(dispatcher),
       current_state_(nullptr),
       current_status_(constants::OperationStatus::HANDOVER) {
   change_state(
@@ -38,37 +48,90 @@ OperationalController::~OperationalController() {
 constants::CommandResponse OperationalController::takeoff(
     double height, constants::ReferenceFrame frame) {
   std::lock_guard<std::mutex> lock(mutex_);
-  return current_state_->try_execute(
-      *this, std::make_unique<TakeoffTask>(height, frame));
+  auto desc = std::make_shared<descriptor::TakeoffOperationDescriptor>(
+      height, frame);
+  operation_context_.set_current_descriptor(desc);
+  auto response = current_state_->try_execute(
+      *this, std::make_unique<TakeoffTask>(*desc));
+  if (response != constants::CommandResponse::ACCEPTED)
+    operation_context_.clear_current_descriptor();
+  return response;
 }
 
 constants::CommandResponse OperationalController::land() {
   std::lock_guard<std::mutex> lock(mutex_);
-  return current_state_->try_execute(
-      *this, std::make_unique<LandTask>());
+  auto desc = std::make_shared<descriptor::LandOperationDescriptor>();
+  operation_context_.set_current_descriptor(desc);
+  auto response = current_state_->try_execute(
+      *this, std::make_unique<LandTask>(*desc));
+  if (response != constants::CommandResponse::ACCEPTED)
+    operation_context_.clear_current_descriptor();
+  return response;
 }
 
 constants::CommandResponse OperationalController::change_yaw(
   double new_yaw, constants::ReferenceFrame frame) {
   std::lock_guard<std::mutex> lock(mutex_);
-  return current_state_->try_execute(
-      *this, std::make_unique<ChangeYawTask>(new_yaw, frame));
+  auto desc = std::make_shared<descriptor::ChangeYawOperationDescriptor>(
+      new_yaw, frame);
+  operation_context_.set_current_descriptor(desc);
+  auto response = current_state_->try_execute(
+      *this, std::make_unique<ChangeYawTask>(*desc));
+  if (response != constants::CommandResponse::ACCEPTED)
+    operation_context_.clear_current_descriptor();
+  return response;
 }
 
 constants::CommandResponse OperationalController::waypoint_following(
     std::vector<vehicle::Waypoint> waypoints,
     constants::ReferenceFrame frame) {
   std::lock_guard<std::mutex> lock(mutex_);
-  return current_state_->try_execute(
-      *this, std::make_unique<WaypointTask>(std::move(waypoints), frame));
+  auto desc = std::make_shared<descriptor::WaypointOperationDescriptor>(
+      std::move(waypoints), frame);
+  operation_context_.set_current_descriptor(desc);
+  auto response = current_state_->try_execute(
+      *this, std::make_unique<WaypointTask>(*desc));
+  if (response != constants::CommandResponse::ACCEPTED)
+    operation_context_.clear_current_descriptor();
+  return response;
 }
 
 constants::CommandResponse OperationalController::trajectory_execution(
     std::vector<vehicle::TrajectoryPoint> trajectory,
     constants::ReferenceFrame frame) {
   std::lock_guard<std::mutex> lock(mutex_);
-  return current_state_->try_execute(
-      *this, std::make_unique<TrajectoryExecutionTask>(std::move(trajectory), frame));
+  auto desc = std::make_shared<descriptor::TrajectoryOperationDescriptor>(
+      std::move(trajectory), frame);
+  operation_context_.set_current_descriptor(desc);
+  auto response = current_state_->try_execute(
+      *this, std::make_unique<TrajectoryExecutionTask>(*desc));
+  if (response != constants::CommandResponse::ACCEPTED)
+    operation_context_.clear_current_descriptor();
+  return response;
+}
+
+constants::CommandResponse OperationalController::follow_target(
+    constants::ReferenceFrame frame) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto desc = std::make_shared<descriptor::FollowTargetOperationDescriptor>(
+      frame);
+  operation_context_.set_current_descriptor(desc);
+  auto response = current_state_->try_execute(
+      *this, std::make_unique<FollowTargetTask>(*desc));
+  if (response != constants::CommandResponse::ACCEPTED)
+    operation_context_.clear_current_descriptor();
+  return response;
+}
+
+void OperationalController::update_follow_target_position(
+    double x, double y, double z) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto desc = operation_context_.current_descriptor();
+  if (desc && desc->operation_type() ==
+      constants::OperationType::FOLLOW_TARGET) {
+    auto& ft = static_cast<descriptor::FollowTargetOperationDescriptor&>(*desc);
+    ft.update_target_position(x, y, z);
+  }
 }
 
 void OperationalController::stop() {
@@ -160,6 +223,9 @@ void OperationalController::on_operation_complete() {
   {
     std::lock_guard<std::mutex> lock(mutex_);
     if (last_report_) last_report_->complete();
+    auto desc = operation_context_.current_descriptor();
+    if (desc) desc->set_lifecycle_status(report::ReportStatus::COMPLETED);
+    operation_context_.clear_current_descriptor();
     report   = last_report_;
     listener = on_complete_listener_;
     change_state(
@@ -185,7 +251,8 @@ void OperationalController::preempt(PreemptionType type,
 
       change_state(
           std::make_unique<PreemptedState>(
-              std::move(result.memento), std::move(result.user_report),
+              std::move(result.user_descriptor),
+              std::move(result.user_report),
               type, info),
           constants::OperationStatus::SUPERVISED);
       listener = on_preemption_event_listener_;

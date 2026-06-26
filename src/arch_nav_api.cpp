@@ -49,6 +49,16 @@ constants::CommandResponse ArchNavApi::trajectory_execution(
   return impl_->controller.trajectory_execution(std::move(trajectory), frame);
 }
 
+constants::CommandResponse ArchNavApi::follow_target(
+    constants::ReferenceFrame frame) {
+  return impl_->controller.follow_target(frame);
+}
+
+void ArchNavApi::update_follow_target_position(
+    double x, double y, double z) {
+  impl_->controller.update_follow_target_position(x, y, z);
+}
+
 void ArchNavApi::cancel_operation() {
   impl_->controller.stop();
 }

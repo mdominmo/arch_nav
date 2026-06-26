@@ -142,10 +142,15 @@ static std::vector<TrajectoryPoint> sample_trajectory() {
 
 class OperationalControllerTest : public ::testing::Test {
  protected:
+  void SetUp() override {
+    context_.subscribe_vehicle_status(
+        [this](const VehicleStatus& s) { ctrl_.on_vehicle_status_update(s); });
+  }
+
   VehicleContext        context_;
-  arch_nav::context::OperationContext operation_context_;
+  OperationContext      operation_context_;
   MockDispatcher        dispatcher_;
-  OperationalController ctrl_{context_, operation_context_, dispatcher_};
+  OperationalController ctrl_{operation_context_, dispatcher_};
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

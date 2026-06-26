@@ -46,6 +46,9 @@ class ArchNavApi {
   constants::CommandResponse trajectory_execution(
       std::vector<vehicle::TrajectoryPoint> trajectory,
       constants::ReferenceFrame frame = constants::ReferenceFrame::LOCAL_NED);
+  constants::CommandResponse follow_target(
+      constants::ReferenceFrame frame = constants::ReferenceFrame::LOCAL_NED);
+  void update_follow_target_position(double x, double y, double z);
   void cancel_operation();
 
   constants::CommandResponse arm();

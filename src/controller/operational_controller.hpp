@@ -13,7 +13,8 @@
 #include "arch_nav/constants/operation_status.hpp"
 #include "arch_nav/constants/reference_frame.hpp"
 #include "controller/navigation_task.hpp"
-#include "controller/navigation_task_memento.hpp"
+#include "arch_nav/context/operation_context.hpp"
+#include "arch_nav/descriptor/operation_descriptor.hpp"
 #include "arch_nav/model/report/operation_report.hpp"
 #include "controller/vehicle_command.hpp"
 #include "arch_nav/model/vehicle/waypoint.hpp"
@@ -27,6 +28,7 @@ namespace arch_nav::controller {
 class OperationalController : public IOperationalController {
  public:
   explicit OperationalController(
+      context::OperationContext& operation_context,
       platform::ICommandDispatcher& dispatcher);
 
   ~OperationalController();
@@ -40,6 +42,8 @@ class OperationalController : public IOperationalController {
   constants::CommandResponse takeoff(double height, constants::ReferenceFrame frame) override;
   constants::CommandResponse land() override;
   constants::CommandResponse change_yaw(double new_yaw, constants::ReferenceFrame frame) override;
+  constants::CommandResponse follow_target(constants::ReferenceFrame frame) override;
+  void update_follow_target_position(double x, double y, double z) override;
   void stop() override;
   constants::CommandResponse arm() override;
   constants::CommandResponse disarm() override;
@@ -78,7 +82,7 @@ class OperationalController : public IOperationalController {
     virtual void try_stop(OperationalController&) {}
 
     struct PreemptionResult {
-      std::unique_ptr<NavigationTaskMemento> memento;
+      std::shared_ptr<descriptor::OperationDescriptor> user_descriptor;
       std::shared_ptr<report::OperationReport> user_report;
       bool accepted{false};
       std::optional<PreemptionEvent> displaced_preemption_event;
@@ -104,6 +108,7 @@ class OperationalController : public IOperationalController {
   void stop_progress_thread();
 
   mutable std::mutex                         mutex_;
+  context::OperationContext&                 operation_context_;
   platform::ICommandDispatcher&              dispatcher_;
   std::unique_ptr<State>                     current_state_;
   constants::OperationStatus                 current_status_;

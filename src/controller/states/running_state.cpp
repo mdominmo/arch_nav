@@ -20,6 +20,10 @@ void OperationalController::RunningState::try_stop(OperationalController& ctx) {
   task_->abort();
   ctx.last_report_->abort();
 
+  auto desc = ctx.operation_context_.current_descriptor();
+  if (desc) desc->set_lifecycle_status(report::ReportStatus::ABORTED);
+  ctx.operation_context_.clear_current_descriptor();
+
   auto report   = ctx.last_report_;
   auto listener = ctx.on_complete_listener_;
 
@@ -42,6 +46,10 @@ void OperationalController::RunningState::on_vehicle_status_update(
   task_->abort();
   ctx.last_report_->abort();
 
+  auto desc = ctx.operation_context_.current_descriptor();
+  if (desc) desc->set_lifecycle_status(report::ReportStatus::ABORTED);
+  ctx.operation_context_.clear_current_descriptor();
+
   auto report   = ctx.last_report_;
   auto listener = ctx.on_complete_listener_;
 
@@ -63,11 +71,13 @@ OperationalController::State::PreemptionResult
 OperationalController::RunningState::try_preempt(OperationalController& ctx) {
   ctx.stop_progress_thread();
 
-  auto memento = task_->make_memento();
-  auto user_report = ctx.last_report_;
+  auto user_descriptor = ctx.operation_context_.current_descriptor();
+  if (user_descriptor)
+    user_descriptor->set_lifecycle_status(report::ReportStatus::SUPERVISED);
+
   task_->abort();
 
-  return {std::move(memento), std::move(user_report), true};
+  return {std::move(user_descriptor), ctx.last_report_, true};
 }
 
 }  // namespace arch_nav::controller

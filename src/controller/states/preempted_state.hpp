@@ -5,14 +5,14 @@
 
 #include "controller/operational_controller.hpp"
 #include "controller/navigation_task.hpp"
-#include "controller/navigation_task_memento.hpp"
+#include "arch_nav/descriptor/operation_descriptor.hpp"
 #include "arch_nav/controller/preemption_info.hpp"
 #include "arch_nav/controller/preemption_type.hpp"
 
 namespace arch_nav::controller {
 
 struct OperationalController::PreemptedState : OperationalController::State {
-  PreemptedState(std::unique_ptr<NavigationTaskMemento> memento,
+  PreemptedState(std::shared_ptr<descriptor::OperationDescriptor> user_descriptor,
                  std::shared_ptr<report::OperationReport> user_report,
                  PreemptionType preemption_type,
                  PreemptionInfo preemption_info);
@@ -31,7 +31,7 @@ struct OperationalController::PreemptedState : OperationalController::State {
   void on_supervisor_task_complete(OperationalController& ctx);
 
  private:
-  std::unique_ptr<NavigationTaskMemento> memento_;
+  std::shared_ptr<descriptor::OperationDescriptor> user_descriptor_;
   std::shared_ptr<report::OperationReport> user_report_;
   PreemptionType preemption_type_;
   PreemptionInfo preemption_info_;
