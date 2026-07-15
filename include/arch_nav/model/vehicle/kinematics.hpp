@@ -23,6 +23,8 @@ struct Kinematics {
   double ref_lon;
   double ref_alt;
 
+  // Yaw/heading in radians, consumed as such by frame_converter.cpp's
+  // trigonometry (BODY<->NED conversion) - drivers must convert on ingest.
   double heading;
 
   explicit Kinematics(
