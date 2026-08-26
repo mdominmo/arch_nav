@@ -1,6 +1,7 @@
 #include "arch_nav/arch_nav.hpp"
 
 #include <cstdlib>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -111,10 +112,14 @@ ArchNavApi& ArchNav::api() {
 ArchNav::~ArchNav() {
   if (impl_) {
     for (auto& sv : impl_->supervisors) {
+      std::cerr << "[arch_nav] stopping supervisor..." << std::endl;
       sv->stop();
+      std::cerr << "[arch_nav] supervisor stopped" << std::endl;
     }
     if (impl_->driver) {
+      std::cerr << "[arch_nav] stopping driver..." << std::endl;
       impl_->driver->stop();
+      std::cerr << "[arch_nav] driver stopped" << std::endl;
     }
   }
 }

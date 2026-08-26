@@ -666,6 +666,62 @@ TEST_F(OperationalControllerTest, Preempt_LandTransientResumes) {
 // Preemption / Memento — ChangeYaw
 // ─────────────────────────────────────────────────────────────────────────────
 
+TEST_F(OperationalControllerTest, Preempt_StopWithNoSupervisorTaskResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_waypoints = true;
+  ctrl_.waypoint_following(sample_waypoints(), ReferenceFrame::GLOBAL_WGS84);
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  // Supervisor calls stop() directly without ever dispatching a task of
+  // its own (e.g. OAS's fallback_stop path) - must still resolve the
+  // preemption instead of getting stuck in SUPERVISED forever. stop()
+  // resumes the original waypoint_following synchronously, no further
+  // dispatcher_.complete() needed.
+  ctrl_.stop();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
+TEST_F(OperationalControllerTest, Preempt_StopWithNoSupervisorTaskTerminalGoesToIdle) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_waypoints = true;
+  ctrl_.waypoint_following(sample_waypoints(), ReferenceFrame::GLOBAL_WGS84);
+
+  ctrl_.preempt(PreemptionType::TERMINAL,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  ctrl_.stop();
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::IDLE);
+  ASSERT_NE(ctrl_.last_operation_report(), nullptr);
+  EXPECT_EQ(ctrl_.last_operation_report()->status(), ReportStatus::ABORTED);
+}
+
+TEST_F(OperationalControllerTest, Preempt_SupervisorTaskRejectedResumes) {
+  context_.update(kernel_armed());
+  dispatcher_.accept_waypoints = true;
+  ctrl_.waypoint_following(sample_waypoints(), ReferenceFrame::GLOBAL_WGS84);
+  ASSERT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+
+  ctrl_.preempt(PreemptionType::TRANSIENT,
+              {"test_supervisor", "test reason", ""});
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::SUPERVISED);
+
+  // Supervisor's own dispatched task is rejected (e.g. OAS sending a
+  // ReferenceFrame the driver doesn't support) - must still resolve the
+  // preemption instead of getting stuck in SUPERVISED forever.
+  dispatcher_.accept_land = false;
+  auto response = ctrl_.land();
+  EXPECT_EQ(response, CommandResponse::NOT_SUPPORTED);
+
+  EXPECT_EQ(ctrl_.operation_status(), OperationStatus::RUNNING);
+}
+
 TEST_F(OperationalControllerTest, Preempt_ChangeYawTransientResumes) {
   context_.update(kernel_armed());
   dispatcher_.accept_change_yaw = true;

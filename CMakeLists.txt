@@ -95,6 +95,8 @@ if(BUILD_TESTING)
     test/unit/core/context/test_vehicle_context_writer_proxy.cpp)
   add_arch_nav_proxy_test(test_vehicle_context_reader_proxy
     test/unit/core/context/test_vehicle_context_reader_proxy.cpp)
+  add_arch_nav_proxy_test(test_supervisor_chain
+    test/unit/supervisor/test_supervisor_chain.cpp)
 endif()
 
 install(DIRECTORY include/

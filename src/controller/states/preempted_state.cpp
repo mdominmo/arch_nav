@@ -37,6 +37,7 @@ OperationalController::PreemptedState::try_execute(
 
   if (response != constants::CommandResponse::ACCEPTED) {
     supervisor_task_.reset();
+    resolve_locked(ctx);
   }
 
   return response;
@@ -45,10 +46,9 @@ OperationalController::PreemptedState::try_execute(
 void OperationalController::PreemptedState::try_stop(
     OperationalController& ctx) {
   if (supervisor_task_) {
-    ctx.stop_progress_thread();
     supervisor_task_->abort();
-    supervisor_task_.reset();
   }
+  resolve_locked(ctx);
 }
 
 OperationalController::State::PreemptionResult
@@ -69,6 +69,11 @@ OperationalController::PreemptedState::try_preempt(OperationalController& ctx) {
 void OperationalController::PreemptedState::on_supervisor_task_complete(
     OperationalController& ctx) {
   std::lock_guard<std::mutex> lock(ctx.mutex_);
+  resolve_locked(ctx);
+}
+
+void OperationalController::PreemptedState::resolve_locked(
+    OperationalController& ctx) {
   ctx.stop_progress_thread();
   supervisor_task_.reset();
 

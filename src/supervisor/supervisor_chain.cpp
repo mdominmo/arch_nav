@@ -16,26 +16,28 @@ void SupervisorChain::register_supervisor(ISupervisor& supervisor, int priority,
 
 void SupervisorChain::request_control(ISupervisor& requester,
                                       const controller::PreemptionInfo& info) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
 
-  const RegisteredSupervisor* entry = nullptr;
-  for (const auto& s : supervisors_) {
-    if (s.supervisor == &requester) {
-      entry = &s;
-      break;
+    const RegisteredSupervisor* entry = nullptr;
+    for (const auto& s : supervisors_) {
+      if (s.supervisor == &requester) {
+        entry = &s;
+        break;
+      }
     }
+    if (!entry) return;
+
+    if (active_supervisor_ && entry->priority >= active_priority_) {
+      return;
+    }
+
+    controller_.preempt(entry->type, info);
+
+    active_supervisor_ = &requester;
+    active_priority_ = entry->priority;
+    active_type_ = entry->type;
   }
-  if (!entry) return;
-
-  if (active_supervisor_ && entry->priority >= active_priority_) {
-    return;
-  }
-
-  controller_.preempt(entry->type, info);
-
-  active_supervisor_ = &requester;
-  active_priority_ = entry->priority;
-  active_type_ = entry->type;
 
   requester.execute(controller_, operation_writer_);
 }

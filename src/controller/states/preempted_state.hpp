@@ -31,6 +31,11 @@ struct OperationalController::PreemptedState : OperationalController::State {
   void on_supervisor_task_complete(OperationalController& ctx);
 
  private:
+  // TODO: tech debt - assumes ctx.mutex_ already held by the caller. Should
+  // become a unique_lock threaded through State::try_stop() instead, but
+  // that touches every State subclass's signature.
+  void resolve_locked(OperationalController& ctx);
+
   std::shared_ptr<descriptor::OperationDescriptor> user_descriptor_;
   std::shared_ptr<report::OperationReport> user_report_;
   PreemptionType preemption_type_;
